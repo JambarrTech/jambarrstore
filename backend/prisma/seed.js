@@ -15,7 +15,7 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
-  await prisma.storeSettings.deleteMany();
+  await prisma.settings.deleteMany();
 
   // Categories
   await prisma.category.createMany({
@@ -93,9 +93,9 @@ async function main() {
   // Reviews
   await prisma.review.createMany({
     data: [
-      { id: 'r1', productId: 'p1', userId: 'u3', clientName: 'Mamadou Diallo', rating: 5, comment: 'Super service ! AirPods Max reçus en moins de 24h à Dakar.', status: 'approved' },
-      { id: 'r2', productId: 'p4', userId: 'u4', clientName: 'Fatou Ndiaye', rating: 5, comment: 'Paiement super simple avec Wave, livraison express irréprochable.', status: 'approved' },
-      { id: 'r3', productId: 'p2', userId: 'u5', clientName: 'Cheikh Sarr', rating: 4, comment: 'Très bon produit mais livraison avec 2h de retard.', status: 'pending' },
+      { id: 'r1', productId: 'p1', clientName: 'Mamadou Diallo', rating: 5, comment: 'Super service ! AirPods Max reçus en moins de 24h à Dakar.', status: 'approved' },
+      { id: 'r2', productId: 'p4', clientName: 'Fatou Ndiaye', rating: 5, comment: 'Paiement super simple avec Wave, livraison express irréprochable.', status: 'approved' },
+      { id: 'r3', productId: 'p2', clientName: 'Cheikh Sarr', rating: 4, comment: 'Très bon produit mais livraison avec 2h de retard.', status: 'pending' },
     ]
   });
 
@@ -117,7 +117,7 @@ async function main() {
   });
 
   // Store settings
-  await prisma.storeSettings.create({
+  await prisma.settings.create({
     data: {
       storeName: 'JambarrTech', storeEmail: 'contact@jambarrtech.com',
       phone: '+221 77 123 45 67', address: 'Dakar, Sénégal',
