@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JambarrTech • Application iPhone & Mobile</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+</head>
+<body class="h-full bg-slate-100 font-sans text-slate-900 flex justify-center items-center">
+  <!-- iPhone Frame Mockup Container -->
+  <div class="w-full max-w-md h-full md:h-[850px] md:rounded-[40px] md:border-[10px] md:border-slate-800 bg-white shadow-2xl flex flex-col overflow-hidden relative">
+    
+    <!-- Dynamic Island / Header -->
+    <div class="bg-gradient-to-r from-[#0A3C8C] to-[#0F52BA] text-white px-5 pt-10 pb-4 flex justify-between items-center shadow-md">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white text-[#0F52BA] rounded-xl flex items-center justify-center font-black text-base shadow">JT</div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-base font-black tracking-tight">jambarr SHOP</h1>
+          </div>
+          <p class="text-[9px] text-white/80 font-medium tracking-wider uppercase">Crée • Gère • Vends • Développe</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="w-9 h-9 flex items-center justify-center bg-white/20 rounded-full relative hover:bg-white/30 transition">
+          <span class="material-symbols-outlined text-white text-sm">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="p-4 bg-white border-b border-slate-100">
+      <div class="flex items-center bg-slate-100 rounded-xl px-4 h-11 border border-slate-200">
+        <span class="material-symbols-outlined text-slate-400 mr-2">search</span>
+        <input type="text" placeholder="Rechercher un produit (AirPods, iPhone...)" class="bg-transparent border-none outline-none text-sm w-full">
+      </div>
+    </div>
+
+    <!-- Interactive Filter Bar -->
+    <div class="px-4 py-2.5 bg-white border-b border-slate-200 flex gap-2 overflow-x-auto scrollbar-none">
+      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-full shadow-sm flex-shrink-0 transition">Tous</button>
+      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Populaires</button>
+      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Prix croissant</button>
+      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Nouveautés</button>
+      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Ventes Flash</button>
+    </div>
+
+    <script>
+      function setActiveFilter(btn) {
+        const buttons = btn.parentElement.querySelectorAll('button');
+        buttons.forEach(b => {
+          b.className = "px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition";
+        });
+        btn.className = "px-4 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-full shadow-sm flex-shrink-0 transition";
+      }
+
+      // Product Database with Multi-Images
+      const productsData = {
+        'airpods': {
+          name: 'AirPods Max',
+          price: '345.000 FCFA',
+          oldPrice: '395.000 FCFA',
+          badge: '-12%',
+          rating: '4.9 (124 avis)',
+          description: 'Casque audio sans fil haute fidélité avec réduction active du bruit et mode transparence.',
+          images: [
+            'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        'watch': {
+          name: 'Apple Watch Ultra',
+          price: '415.000 FCFA',
+          oldPrice: '450.000 FCFA',
+          badge: '-8%',
+          rating: '4.8 (98 avis)',
+          description: 'Montre connectée robuste conçue pour l’endurance, l’aventure et les sports extrêmes.',
+          images: [
+            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        'macbook': {
+          name: 'MacBook Pro M3',
+          price: '1.250.000 FCFA',
+          oldPrice: '1.350.000 FCFA',
+          badge: 'Pro',
+          rating: '5.0 (42 avis)',
+          description: 'Ordinateur portable surpuissant propulsé par la puce M3 Pro pour les professionnels exigeants.',
+          images: [
+            'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        'iphone': {
+          name: 'iPhone 15 Pro Max',
+          price: '890.000 FCFA',
+          oldPrice: '990.000 FCFA',
+          badge: '-15%',
+          rating: '4.9 (215 avis)',
+          description: 'Design en titane aérospatial, puce A17 Pro révolutionnaire et système photo pro avancé.',
+          images: [
+            'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80'
+          ]
+        }
+      };
+
+      function openProduct(key) {
+        currentProductKey = key;
+        const prod = productsData[key];
+        if (!prod) return;
+
+        document.getElementById('modalTitle').innerText = prod.name;
+        document.getElementById('modalPrice').innerText = prod.price;
+        document.getElementById('modalOldPrice').innerText = prod.oldPrice;
+        document.getElementById('modalBadge').innerText = prod.badge;
+        document.getElementById('modalRating').innerText = prod.rating;
+        document.getElementById('modalDesc').innerText = prod.description;
+
+        const mainImg = document.getElementById('modalMainImage');
+        mainImg.innerHTML = `<img src="${prod.images[0]}" class="w-full h-full object-cover rounded-2xl" alt="${prod.name}">`;
+
+        const thumbsContainer = document.getElementById('modalThumbnails');
+        thumbsContainer.innerHTML = '';
+        prod.images.forEach((imgUrl, index) => {
+          const thumb = document.createElement('div');
+          thumb.className = `w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 ${index === 0 ? 'border-[#0F52BA]' : 'border-slate-200'}`;
+          thumb.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover" alt="thumb">`;
+          thumb.onclick = () => {
+            mainImg.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-2xl" alt="${prod.name}">`;
+            thumbsContainer.querySelectorAll('div').forEach(d => d.className = 'w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 border-slate-200');
+            thumb.className = 'w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 border-[#0F52BA]';
+          };
+          thumbsContainer.appendChild(thumb);
+        });
+
+        document.getElementById('productModal').classList.remove('hidden');
+      }
+
+      function closeProductModal() {
+        document.getElementById('productModal').classList.add('hidden');
+      }
+
+      let currentProductKey = null;
+      let cartItems = [
+        { key: 'airpods', name: 'AirPods Max', price: 345000, priceStr: '345.000 FCFA', qty: 1, image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80' },
+        { key: 'watch', name: 'Apple Watch Ultra', price: 415000, priceStr: '415.000 FCFA', qty: 1, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80' }
+      ];
+
+      function addCurrentToCart() {
+        if (!currentProductKey) return;
+        const prod = productsData[currentProductKey];
+        const existing = cartItems.find(i => i.key === currentProductKey);
+        const numericPrice = parseInt(prod.price.replace(/\D/g, ''));
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          cartItems.push({
+            key: currentProductKey,
+            name: prod.name,
+            price: numericPrice,
+            priceStr: prod.price,
+            qty: 1,
+            image: prod.images[0]
+          });
+        }
+        updateCartBadge();
+        closeProductModal();
+        alert('Produit ajouté au panier avec succès !');
+      }
+
+      function updateCartBadge() {
+        const totalQty = cartItems.reduce((acc, item) => acc + item.qty, 0);
+        const badges = document.querySelectorAll('.cart-badge');
+        badges.forEach(b => b.innerText = totalQty);
+      }
+
+      function openCartModal() {
+        renderCart();
+        document.getElementById('cartModal').classList.remove('hidden');
+      }
+
+      function closeCartModal() {
+        document.getElementById('cartModal').classList.add('hidden');
+      }
+
+      function changeQty(key, delta) {
+        const item = cartItems.find(i => i.key === key);
+        if (!item) return;
+        item.qty += delta;
+        if (item.qty <= 0) {
+          cartItems = cartItems.filter(i => i.key !== key);
+        }
+        renderCart();
+        updateCartBadge();
+      }
+
+      function renderCart() {
+        const container = document.getElementById('cartItemsContainer');
+        const summaryContainer = document.getElementById('cartSummaryTotal');
+        if (cartItems.length === 0) {
+          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Votre panier est vide 🛒</div>`;
+          summaryContainer.innerText = '0 FCFA';
+          return;
+        }
+        let html = '';
+        let total = 0;
+        cartItems.forEach(item => {
+          total += item.price * item.qty;
+          html += `
+            <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <img src="${item.image}" class="w-12 h-12 object-cover rounded-lg" alt="${item.name}">
+              <div class="flex-1">
+                <h4 class="font-bold text-xs text-slate-800">${item.name}</h4>
+                <p class="text-xs font-extrabold text-[#0F52BA] mt-0.5">${item.priceStr}</p>
+              </div>
+              <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                <button onclick="changeQty('${item.key}', -1)" class="text-slate-500 font-bold px-1 text-xs">-</button>
+                <span class="text-xs font-bold">${item.qty}</span>
+                <button onclick="changeQty('${item.key}', 1)" class="text-slate-500 font-bold px-1 text-xs">+</button>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+        summaryContainer.innerText = total.toLocaleString() + ' FCFA';
+      }
+
+      function submitCheckout(e) {
+        e.preventDefault();
+        if (cartItems.length === 0) {
+          alert('Votre panier est vide !');
+          return;
+        }
+        const fullName = document.getElementById('checkoutName').value;
+        const phone = document.getElementById('checkoutPhone').value;
+        const address = document.getElementById('checkoutAddress').value;
+        const paymentInput = document.querySelector('input[name="paymentMethod"]:checked');
+        const paymentMethod = paymentInput ? paymentInput.value : 'wave';
+
+        alert(`Commande validée avec succès !\n\nClient : ${fullName}\nTéléphone : ${phone}\nAdresse : ${address}\nPaiement via : ${paymentMethod.toUpperCase()}\n\nMerci d'avoir commandé sur JambarrShop !`);
+        cartItems = [];
+        updateCartBadge();
+        closeCartModal();
+      }
+    </script>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
+      
+      <!-- Flash Sale Banner -->
+      <div class="bg-gradient-to-r from-[#0A3C8C] to-[#0F52BA] rounded-2xl p-5 text-white relative overflow-hidden shadow-lg">
+        <div class="relative z-10">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 bg-white/20 text-white text-[10px] font-bold rounded-full uppercase">⚡ Vente Flash -20%</span>
+            <span class="text-xs bg-red-600 px-2 py-0.5 rounded-md font-bold">Fin dans 04:12:35</span>
+          </div>
+          <h3 class="text-xl font-extrabold mt-2">AirPods Max & Ultra Watch</h3>
+          <p class="text-xs text-white/80 mt-1">Offre limitée valable sur l'application iPhone & Mobile</p>
+          <button onclick="openProduct('airpods')" class="mt-4 px-4 py-2 bg-white text-[#0F52BA] font-bold text-xs rounded-xl shadow">Acheter maintenant</button>
+        </div>
+        <div class="absolute -right-6 -bottom-6 text-7xl opacity-20">🎧</div>
+      </div>
+
+      <!-- Official Stores / Brands Section -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-800 mb-3">Boutiques Officielles</h3>
+        <div class="grid grid-cols-4 gap-3">
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
+            <span class="text-2xl">🍏</span>
+            <span class="text-[10px] font-bold text-slate-700 mt-1">Apple</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
+            <span class="text-2xl">📱</span>
+            <span class="text-[10px] font-bold text-slate-700 mt-1">Samsung</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
+            <span class="text-2xl">⚡</span>
+            <span class="text-[10px] font-bold text-slate-700 mt-1">Xiaomi</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
+            <span class="text-2xl">👟</span>
+            <span class="text-[10px] font-bold text-slate-700 mt-1">Nike</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-800 mb-3">Catégories Populaires</h3>
+        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div class="w-14 h-14 bg-blue-50 text-[#0F52BA] rounded-2xl flex items-center justify-center border border-blue-200 font-bold">📱</div>
+            <span class="text-[11px] font-bold text-slate-700">High-Tech</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">👕</div>
+            <span class="text-[11px] font-bold text-slate-600">Mode</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">🏠</div>
+            <span class="text-[11px] font-bold text-slate-600">Maison</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">🧴</div>
+            <span class="text-[11px] font-bold text-slate-600">Beauté</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">⚽</div>
+            <span class="text-[11px] font-bold text-slate-600">Sport</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Popular Products Grid -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-slate-800">Produits Populaires</h3>
+          <span class="text-xs font-bold text-[#0F52BA]">Voir tout</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <!-- AirPods Max Card -->
+          <div onclick="openProduct('airpods')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="AirPods Max">
+              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-12%</span>
+            </div>
+            <div class="mt-2">
+              <h4 class="text-xs font-bold text-slate-800 truncate">AirPods Max</h4>
+              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">345.000 FCFA</p>
+              <button onclick="event.stopPropagation(); openProduct('airpods');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
+            </div>
+          </div>
+
+          <!-- Apple Watch Ultra Card -->
+          <div onclick="openProduct('watch')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Apple Watch Ultra">
+              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-8%</span>
+            </div>
+            <div class="mt-2">
+              <h4 class="text-xs font-bold text-slate-800 truncate">Apple Watch Ultra</h4>
+              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">415.000 FCFA</p>
+              <button onclick="event.stopPropagation(); openProduct('watch');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Reviews Section -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-slate-800">Avis des clients</h3>
+          <span class="text-xs font-bold text-[#0F52BA]">4.8 / 5.0</span>
+        </div>
+        <div class="space-y-3">
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0F52BA] font-bold flex items-center justify-center text-xs">MD</div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">Mamadou Diallo</h4>
+                  <p class="text-[10px] text-slate-400">Achat vérifié • Il y a 2 jours</p>
+                </div>
+              </div>
+              <div class="flex text-amber-400 text-xs">★★★★★</div>
+            </div>
+            <p class="text-xs text-slate-600">"Super service ! AirPods Max reçus en moins de 24h à Dakar, emballage nickel et produit authentique."</p>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0F52BA] font-bold flex items-center justify-center text-xs">FN</div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">Fatou Ndiaye</h4>
+                  <p class="text-[10px] text-slate-400">Achat vérifié • Il y a 5 jours</p>
+                </div>
+              </div>
+              <div class="flex text-amber-400 text-xs">★★★★★</div>
+            </div>
+            <p class="text-xs text-slate-600">"Paiement super simple avec Wave, livraison express irréprochable. Je recommande vivement JambarrTech !"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- High-Tech & Laptops Section -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-slate-800">High-Tech & Ordinateurs</h3>
+          <span class="text-xs font-bold text-[#0F52BA]">Voir tout</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <!-- MacBook Pro M3 Card -->
+          <div onclick="openProduct('macbook')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="MacBook Pro M3">
+              <span class="absolute top-2 left-2 px-2 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded-md">Pro</span>
+            </div>
+            <div class="mt-2">
+              <h4 class="text-xs font-bold text-slate-800 truncate">MacBook Pro M3</h4>
+              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">1.250.000 FCFA</p>
+              <button onclick="event.stopPropagation(); openProduct('macbook');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
+            </div>
+          </div>
+
+          <!-- iPhone 15 Pro Max Card -->
+          <div onclick="openProduct('iphone')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="iPhone 15 Pro Max">
+              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-15%</span>
+            </div>
+            <div class="mt-2">
+              <h4 class="text-xs font-bold text-slate-800 truncate">iPhone 15 Pro Max</h4>
+              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">890.000 FCFA</p>
+              <button onclick="event.stopPropagation(); openProduct('iphone');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Express Delivery & Club Jambarr Benefits -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
+        <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider">🚀 Club Jambarr Express</h4>
+        <p class="text-xs text-blue-700 mt-1">Livraison garantie en moins de 24h à Dakar et banlieue, avec suivi en temps réel.</p>
+        <div class="mt-3 flex gap-2">
+          <span class="px-3 py-1 bg-white text-[#0F52BA] text-[10px] font-bold rounded-lg shadow-sm">Livraison Gratuite dès 50k</span>
+          <span class="px-3 py-1 bg-white text-[#0F52BA] text-[10px] font-bold rounded-lg shadow-sm">Garantie 1 An</span>
+        </div>
+      </div>
+
+      <!-- Payment Methods Banner -->
+      <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-emerald-800">Paiement Mobile Sécurisé</p>
+          <p class="text-[11px] text-emerald-600">Wave & Orange Money acceptés</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="px-2.5 py-1 bg-blue-500 text-white text-xs font-bold rounded-lg">Wave</span>
+          <span class="px-2.5 py-1 bg-orange-600 text-white text-xs font-bold rounded-lg">OM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Detail Modal with Multi-Image Gallery -->
+    <div id="productModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end backdrop-blur-sm transition-all">
+      <div class="bg-white rounded-t-[30px] p-6 max-h-[85%] flex flex-col shadow-2xl animate-slide-up relative">
+        <!-- Close Button -->
+        <button onclick="closeProductModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold">✕</button>
+        
+        <!-- Main Image Preview -->
+        <div id="modalMainImage" class="w-full aspect-square bg-slate-100 rounded-2xl overflow-hidden shadow-md mb-3 flex items-center justify-center">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Thumbnails Gallery -->
+        <div class="mb-4">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Galerie Photos du Produit</p>
+          <div id="modalThumbnails" class="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="flex-1 overflow-y-auto space-y-2 mb-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span id="modalBadge" class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-md uppercase"></span>
+              <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mt-1"></h3>
+            </div>
+            <div class="text-right">
+              <p id="modalPrice" class="text-lg font-extrabold text-[#0F52BA]"></p>
+              <p id="modalOldPrice" class="text-xs text-slate-400 line-through"></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-xs text-amber-500 font-bold">
+            <span>★</span> <span id="modalRating"></span>
+          </div>
+          <p id="modalDesc" class="text-xs text-slate-600 leading-relaxed"></p>
+        </div>
+
+        <!-- Action Button -->
+        <button onclick="addCurrentToCart()" class="w-full py-3 bg-[#0F52BA] text-white font-bold rounded-2xl shadow-lg hover:bg-blue-800 transition">
+          Ajouter au Panier 🛒
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart & Checkout Modal -->
+    <div id="cartModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end backdrop-blur-sm transition-all">
+      <div class="bg-white rounded-t-[30px] p-6 max-h-[90%] flex flex-col shadow-2xl relative">
+        <button onclick="closeCartModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold">✕</button>
+        
+        <h3 class="font-extrabold text-base text-slate-800 mb-4 flex items-center gap-2">
+          <span>🛒</span> Mon Panier & Validation (Checkout)
+        </h3>
+
+        <div class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1">
+          <!-- Dynamic Cart Items -->
+          <div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. Résumé des Produits</p>
+            <div id="cartItemsContainer" class="space-y-2">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <hr class="border-slate-100">
+
+          <!-- Delivery Address Form -->
+          <form id="checkoutForm" onsubmit="submitCheckout(event)" class="space-y-3">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Adresse de Livraison</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] font-bold text-slate-600">Nom complet</label>
+                <input type="text" id="checkoutName" required placeholder="Amadou Ba" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-600">Téléphone</label>
+                <input type="tel" id="checkoutPhone" required placeholder="+221 77..." class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
+              </div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-600">Quartier / Adresse de Livraison</label>
+              <input type="text" id="checkoutAddress" required placeholder="Almadies, Dakar" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
+            </div>
+
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider pt-2">3. Mode de Paiement</p>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center gap-3 p-3 border-2 border-blue-500 bg-blue-50/50 rounded-xl cursor-pointer">
+                <input type="radio" name="paymentMethod" value="wave" checked class="text-[#0F52BA]">
+                <div>
+                  <p class="font-bold text-xs text-slate-800">Wave</p>
+                  <p class="text-[9px] text-blue-600">Paiement instantané</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-orange-500">
+                <input type="radio" name="paymentMethod" value="orange" class="text-orange-600">
+                <div>
+                  <p class="font-bold text-xs text-slate-800">Orange Money</p>
+                  <p class="text-[9px] text-orange-600">Sécurisé USSD</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center mt-4">
+              <span class="text-xs font-bold text-slate-600">Total à payer :</span>
+              <span id="cartSummaryTotal" class="text-base font-extrabold text-[#0F52BA]">0 FCFA</span>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-[#0F52BA] text-white font-bold rounded-2xl shadow-lg hover:bg-blue-800 transition text-sm">
+              Valider et Payer la Commande 🚀
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 px-6 flex items-center justify-between shadow-lg">
+      <button class="flex flex-col items-center text-[#0F52BA]">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="text-[9px] font-bold uppercase">Accueil</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
+        <span class="material-symbols-outlined text-xl">category</span>
+        <span class="text-[9px] font-bold uppercase">Catégories</span>
+      </button>
+      <button onclick="openCartModal()" class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA] relative cursor-pointer">
+        <span class="material-symbols-outlined text-xl">shopping_cart</span>
+        <span class="text-[9px] font-bold uppercase">Panier</span>
+        <span class="cart-badge absolute -top-1 -right-2 w-4 h-4 bg-[#0F52BA] text-white text-[9px] flex items-center justify-center rounded-full font-bold">2</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
+        <span class="material-symbols-outlined text-xl">favorite</span>
+        <span class="text-[9px] font-bold uppercase">Favoris</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
+        <span class="material-symbols-outlined text-xl">person</span>
+        <span class="text-[9px] font-bold uppercase">Profil</span>
+      </button>
+    </nav>
+
+  </div>
+</body>
+</html>
