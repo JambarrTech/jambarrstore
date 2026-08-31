@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,8 +15,6 @@ model User {
   password  String
   role      String   @default("CLIENT") // CLIENT, ADMIN, MANAGER
   createdAt DateTime @default(now())
-  orders    Order[]
-  reviews   Review[]
 }
 
 model Category {
@@ -48,7 +46,6 @@ model Product {
 model Order {
   id            String      @id @default(uuid())
   reference     String      @unique
-  userId        String?
   clientName    String
   clientPhone   String?
   clientAddress String?
@@ -74,8 +71,6 @@ model Review {
   id         String   @id @default(uuid())
   productId  String?
   product    Product? @relation(fields: [productId], references: [id])
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
   clientName String
   rating     Int      @default(5)
   comment    String
@@ -110,23 +105,13 @@ model ActivityLog {
   action    String
   user      String
   module    String
+  ipAddress String?
   result    String   @default("SUCCÈS")
   createdAt DateTime @default(now())
 }
 
 model Settings {
-  id             String  @id @default("settings")
-  storeName      String
-  storeEmail     String
-  phone          String
-  address        String
-  logoUrl        String?
-  commissionRate Float   @default(5.0)
-  minCommission  Float   @default(500)
-}
-
-model StoreSettings {
-  id             String @id @default(uuid())
+  id             String @id @default("settings")
   storeName      String @default("JambarrTech")
   storeEmail     String @default("contact@jambarrtech.com")
   phone          String @default("+221 77 123 45 67")
