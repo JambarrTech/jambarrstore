@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
@@ -16,6 +17,11 @@ if (!JWT_SECRET) {
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static frontend files
+app.use('/web-mobile', express.static(path.join(__dirname, '..', 'web-mobile')));
+app.use('/web-dashboard', express.static(path.join(__dirname, '..', 'web-dashboard')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Auth middleware
 function authMiddleware(req, res, next) {
