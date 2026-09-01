@@ -20,6 +20,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/web-mobile", "destination": "/web-mobile/index.html" },
     { "source": "/web-mobile/", "destination": "/web-mobile/index.html" },
     { "source": "/web-dashboard", "destination": "/web-dashboard/index.html" },
