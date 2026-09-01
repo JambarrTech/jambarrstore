@@ -1,7 +1,8 @@
 {
-  "installCommand": "npm install --ignore-scripts && npx prisma generate",
-  "outputDirectory": ".",
+  "installCommand": "npm install",
+  "buildCommand": "npx prisma generate",
   "framework": null,
+  "outputDirectory": "public",
   "headers": [
     {
       "source": "/api/(.*)",
@@ -11,5 +12,8 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
       ]
     }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" }
   ]
 }
