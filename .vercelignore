@@ -1,0 +1,5 @@
+backend/
+app/
+.git/
+node_modules/
+.vercel/

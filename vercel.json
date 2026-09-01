@@ -1,8 +1,6 @@
 {
-  "buildCommand": "npx prisma generate && echo Build complete",
   "installCommand": "npm install --ignore-scripts && npx prisma generate",
   "framework": null,
-  "outputDirectory": "public",
   "headers": [
     {
       "source": "/api/(.*)",
