@@ -567,6 +567,35 @@ app.delete('/api/promotions/:id', authMiddleware, adminOnly, async (req, res) =>
   }
 });
 
+// ==================== CUSTOMERS ====================
+app.get('/api/customers', authMiddleware, managerOrAdmin, async (req, res) => {
+  try {
+    const customers = await prisma.user.findMany({ where: { role: 'CLIENT' }, include: { orders: true } });
+    const result = customers.map(c => ({
+      id: c.id, name: c.name, phone: c.phone, email: c.email,
+      ordersCount: c.orders.length,
+      totalSpent: c.orders.reduce((s, o) => s + o.totalAmount, 0)
+    }));
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==================== MANAGERS ====================
+app.get('/api/managers', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const managers = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'MANAGER'] } } });
+    const result = managers.map(m => ({
+      id: m.id, name: m.name, email: m.email,
+      role: m.role === 'ADMIN' ? 'Super Administrateur' : 'Gérant Boutique'
+    }));
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ==================== STATS ====================
 app.get('/api/stats', authMiddleware, async (req, res) => {
   try {
@@ -627,9 +656,9 @@ app.get('/api/activity-logs', authMiddleware, async (req, res) => {
 // ==================== SETTINGS ====================
 app.get('/api/settings', async (req, res) => {
   try {
-    let settings = await prisma.storeSettings.findFirst();
+    let settings = await prisma.settings.findFirst();
     if (!settings) {
-      settings = await prisma.storeSettings.create({ data: {} });
+      settings = await prisma.settings.create({ data: {} });
     }
     res.json(settings);
   } catch (e) {
@@ -639,11 +668,11 @@ app.get('/api/settings', async (req, res) => {
 
 app.put('/api/settings', authMiddleware, adminOnly, async (req, res) => {
   try {
-    let settings = await prisma.storeSettings.findFirst();
+    let settings = await prisma.settings.findFirst();
     if (!settings) {
-      settings = await prisma.storeSettings.create({ data: {} });
+      settings = await prisma.settings.create({ data: {} });
     }
-    settings = await prisma.storeSettings.update({
+    settings = await prisma.settings.update({
       where: { id: settings.id },
       data: {
         ...(req.body.storeName && { storeName: req.body.storeName }),

@@ -418,7 +418,7 @@
       const phone = document.getElementById('checkoutPhone').value;
       const address = document.getElementById('checkoutAddress').value;
       const paymentInput = document.querySelector('input[name="paymentMethod"]:checked');
-      const paymentMethod = paymentInput ? paymentInput.value : 'wave';
+      const paymentMethod = paymentInput ? (paymentInput.value === 'wave' ? 'Wave' : 'Orange Money') : 'Wave';
 
       const totalAmount = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
 

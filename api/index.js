@@ -3,7 +3,10 @@ const prisma = require('./lib/prisma');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'jambarrtech_secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET non défini');
+}
 
 // Simple in-memory rate limiter
 const rateLimit = {};
@@ -15,14 +18,6 @@ function checkRateLimit(ip, maxRequests = 60, windowMs = 60000) {
   rateLimit[ip].push(now);
   return true;
 }
-// Cleanup every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const ip in rateLimit) {
-    rateLimit[ip] = rateLimit[ip].filter(t => now - t < 60000);
-    if (rateLimit[ip].length === 0) delete rateLimit[ip];
-  }
-}, 300000);
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
@@ -211,6 +206,24 @@ const handler = async (req, res) => {
       });
       await logActivity(`Ajout produit: ${name}`, user.email, 'Produits');
       return json(res, 201, product);
+    }
+
+    if (path === '/products/featured' && method === 'GET') {
+      const products = await prisma.product.findMany({
+        where: { isFeatured: true },
+        orderBy: { createdAt: 'desc' },
+        include: { category: true, _count: { select: { reviews: true } } }
+      });
+      return json(res, 200, products);
+    }
+
+    if (path === '/products/flash' && method === 'GET') {
+      const products = await prisma.product.findMany({
+        where: { isFlash: true },
+        orderBy: { createdAt: 'desc' },
+        include: { category: true, _count: { select: { reviews: true } } }
+      });
+      return json(res, 200, products);
     }
 
     if (path.match(/^\/products\/[^/]+$/) && method === 'GET') {
