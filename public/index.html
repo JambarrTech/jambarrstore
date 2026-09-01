@@ -277,7 +277,9 @@
 </div>
 
 <script>
+const API_BASE='/api';
 let cart=[],favorites=[],selectedPayment='wave',onboardStep=0;
+let allProducts=[],allCategories=[],allOrders=[];
 
 const onboardData=[
   {icon:'storefront',title:"Découvrez l'Excellence",desc:"La marketplace premium au Sénégal regroupant les meilleures enseignes de mode, tech et beauté."},
@@ -285,29 +287,16 @@ const onboardData=[
   {icon:'payment',title:"Paiement Wave & Orange Money",desc:"Payez en un clic via Wave ou Orange Money, sans carte bancaire, en toute sécurité."}
 ];
 
-const categories=[
-  {id:'1',name:'Mode',image:'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=200&q=80'},
-  {id:'2',name:'Tech & Électronique',image:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80'},
-  {id:'3',name:'Maison & Déco',image:'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=200&q=80'},
-  {id:'4',name:'Beauté & Soins',image:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=200&q=80'},
-  {id:'5',name:'Sport & Fitness',image:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=200&q=80'},
-  {id:'6',name:'Informatique',image:'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=200&q=80'}
-];
+async function apiFetch(path){const r=await fetch(API_BASE+path);if(!r.ok)throw new Error('API error');return r.json()}
 
-const products=[
-  {id:'p1',name:'Casque Sans Fil ANC Pro',category:'Tech & Électronique',price:45000,promoPrice:55000,description:'Casque audio haut de gamme à réduction active de bruit, autonomie 40h.',stock:18,image:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Tech Store',rating:4.9,reviewCount:214},
-  {id:'p2',name:'Sneakers Urbaines Premium',category:'Mode',price:32000,promoPrice:40000,description:'Chaussures de ville élégantes en cuir véritable, confort exceptionnel.',stock:25,image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Fashion',rating:4.7,reviewCount:98},
-  {id:'p3',name:'Montre Connectée Sport',category:'Tech & Électronique',price:65000,promoPrice:75000,description:'Suivi santé complet, GPS intégré, étanche 5ATM, écran AMOLED.',stock:12,image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Tech Store',rating:4.8,reviewCount:156},
-  {id:'p4',name:'Sac à Dos Cuir Minimaliste',category:'Mode',price:28000,promoPrice:null,description:'Sac à dos professionnel pour ordinateur 15 pouces, imperméable.',stock:30,image:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80',boutique:'Maison Dakar',rating:4.6,reviewCount:82},
-  {id:'p5',name:'Lampe de Bureau LED',category:'Maison & Déco',price:18500,promoPrice:22000,description:'Lampe tactile avec chargeur sans fil intégré, température réglable.',stock:40,image:'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80',boutique:'Design Deco SN',rating:4.9,reviewCount:64},
-  {id:'p6',name:'Kit Sérum Visage Bio',category:'Beauté & Soins',price:15000,promoPrice:null,description:'Sérum vitamine C et acide hyaluronique pour teint lumineux.',stock:55,image:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',boutique:'Cosmetics Dakar',rating:4.9,reviewCount:142}
-];
-
-const orders=[
-  {ref:'JBT-9821',total:79000,status:'En cours',date:'31/08/2026',payment:'Wave'},
-  {ref:'JBT-9820',total:65000,status:'Préparation',date:'31/08/2026',payment:'Orange Money'},
-  {ref:'JBT-9819',total:37000,status:'Terminée',date:'30/08/2026',payment:'Wave'}
-];
+async function loadData(){
+  try{
+    const[prods,cats]=await Promise.all([apiFetch('/products'),apiFetch('/categories')]);
+    allProducts=prods.map(p=>({id:p.id,name:p.name,category:p.category?.name||'',price:p.price,promoPrice:p.oldPrice,description:p.description||'',stock:p.stock,image:p.imageUrl,boutique:p.category?.name||'',rating:4.8,reviewCount:p._count?.reviews||0,categoryId:p.categoryId,isFeatured:p.isFeatured,isFlash:p.isFlash}));
+    allCategories=cats.map(c=>({id:c.id,name:c.name,image:'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=200&q=80',icon:c.icon,productCount:c._count?.products||0}));
+    renderAll();
+  }catch(e){console.error('Load error:',e);renderAll()}
+}
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none'});
@@ -342,8 +331,9 @@ function switchTab(tab){
 
 function productCard(p,scroll){
   const isFav=favorites.includes(p.id);
+  const img=p.image||'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80';
   return`<div class="product-card" onclick="showProduct('${p.id}')" style="${scroll?'min-width:165px;width:165px':'width:100%'}">
-    <div style="position:relative;height:140px"><img src="${p.image}" style="width:100%;height:100%;object-fit:cover">
+    <div style="position:relative;height:140px"><img src="${img}" style="width:100%;height:100%;object-fit:cover">
       <button onclick="event.stopPropagation();toggleFav('${p.id}')" style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined ${isFav?'filled':''}" style="font-size:18px;color:${isFav?'#EF4444':'#9CA3AF'}">favorite</span></button>
     </div>
     <div style="padding:12px"><p style="font-size:14px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</p>
@@ -353,10 +343,11 @@ function productCard(p,scroll){
 }
 
 function showProduct(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
+  const p=allProducts.find(x=>x.id===id);if(!p)return;
   window._currentProduct=p;
+  const img=p.image||'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80';
   document.getElementById('detail-content').innerHTML=`
-    <div style="position:relative;height:300px"><img src="${p.image}" style="width:100%;height:100%;object-fit:cover">
+    <div style="position:relative;height:300px"><img src="${img}" style="width:100%;height:100%;object-fit:cover">
       <button onclick="showScreen('tab-home')" style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
       <button onclick="toggleFav('${p.id}');showProduct('${p.id}')" style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined ${favorites.includes(p.id)?'filled':''}" style="color:${favorites.includes(p.id)?'#EF4444':'#9CA3AF'}">favorite</span></button>
     </div>
@@ -370,7 +361,7 @@ function showProduct(id){
       <div style="height:1px;background:#E2E8F0;margin:16px 0"></div>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">Description</h3>
       <p style="font-size:14px;color:#64748B;line-height:20px">${p.description}</p>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span class="material-symbols-outlined" style="font-size:18px;color:#10B981">check_circle</span><span style="font-size:13px;font-weight:600;color:#10B981">Stock disponible (${p.stock} unités)</span></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span class="material-symbols-outlined" style="font-size:18px;color:${p.stock>5?'#10B981':'#EF4444'}">check_circle</span><span style="font-size:13px;font-weight:600;color:${p.stock>5?'#10B981':'#EF4444'}">${p.stock>5?'Stock disponible':'Stock limité'} (${p.stock} unités)</span></div>
     </div>`;
   document.getElementById('detail-bottom').style.display='flex';
   showScreen('product-detail');
@@ -378,7 +369,13 @@ function showProduct(id){
 
 function filterProducts(){
   const q=document.getElementById('search-input').value.toLowerCase();
-  document.getElementById('search-results').innerHTML=products.filter(p=>p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)).map(p=>productCard(p,false)).join('');
+  document.getElementById('search-results').innerHTML=allProducts.filter(p=>p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)).map(p=>productCard(p,false)).join('');
+}
+
+function filterByCategory(name){
+  const filtered=name?allProducts.filter(p=>p.category===name):allProducts;
+  document.getElementById('all-products').innerHTML=filtered.map(p=>productCard(p,false)).join('');
+  switchTab('home');
 }
 
 function toggleFav(id){const i=favorites.indexOf(id);if(i>-1)favorites.splice(i,1);else favorites.push(id)}
@@ -403,7 +400,7 @@ function renderCart(){
   const sum=document.getElementById('cart-summary');
   if(!cart.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px"><span class="material-symbols-outlined" style="font-size:48px;color:#94A3B8">shopping_bag</span><h3 style="font-size:18px;font-weight:700;margin-top:12px">Panier vide</h3></div>`;sum.style.display='none';return}
   el.innerHTML=cart.map((c,i)=>`<div class="card" style="display:flex;gap:12px;margin-bottom:12px">
-    <img src="${c.product.image}" style="width:70px;height:70px;border-radius:8px;object-fit:cover">
+    <img src="${c.product.image||'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100'}" style="width:70px;height:70px;border-radius:8px;object-fit:cover">
     <div style="flex:1"><p style="font-size:14px;font-weight:700">${c.product.name}</p><p style="font-size:13px;font-weight:700;color:#0F52BA;margin-top:4px">${c.product.price.toLocaleString()} FCFA</p>
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
         <button onclick="changeQty(${i},-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid #E2E8F0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:16px">remove</span></button>
@@ -422,16 +419,16 @@ function changeQty(i,d){cart[i].quantity+=d;if(cart[i].quantity<=0)cart.splice(i
 function renderFavorites(){
   const el=document.getElementById('favorites-content');
   if(!favorites.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px"><span class="material-symbols-outlined" style="font-size:48px;color:#94A3B8">favorite</span><h3 style="font-size:18px;font-weight:700;margin-top:12px">Aucun favori</h3></div>`;return}
-  el.innerHTML=`<div class="product-grid">${products.filter(p=>favorites.includes(p.id)).map(p=>productCard(p,false)).join('')}</div>`;
+  el.innerHTML=`<div class="product-grid">${allProducts.filter(p=>favorites.includes(p.id)).map(p=>productCard(p,false)).join('')}</div>`;
 }
 
 function renderProfileOrders(){
-  document.getElementById('profile-orders').innerHTML=orders.map(o=>{
-    const colors={'En cours':'#0F52BA','Préparation':'#F59E0B','Terminée':'#10B981'};
+  document.getElementById('profile-orders').innerHTML=allOrders.length?allOrders.slice(0,5).map(o=>{
+    const colors={'PENDING':'#F59E0B','PROCESSING':'#0F52BA','DELIVERED':'#10B981','CANCELLED':'#EF4444'};
     return`<div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-      <div><p style="font-weight:700">Commande #${o.ref}</p><p style="font-size:12px;color:#64748B">${o.total.toLocaleString()} FCFA · ${o.date}</p></div>
-      <span class="status-badge" style="background:${colors[o.status]||'#0F52BA'}15;color:${colors[o.status]||'#0F52BA'}">${o.status}</span>
-    </div>`}).join('');
+      <div><p style="font-weight:700">Commande #${o.reference}</p><p style="font-size:12px;color:#64748B">${o.totalAmount.toLocaleString()} FCFA · ${new Date(o.createdAt).toLocaleDateString('fr-FR')}</p></div>
+      <span style="background:${colors[o.status]||'#0F52BA'}15;color:${colors[o.status]||'#0F52BA'};padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600">${o.status}</span>
+    </div>`}).join(''):'<p style="text-align:center;color:#94A3B8;padding:20px">Aucune commande</p>';
 }
 
 function selectPayment(m){
@@ -444,23 +441,34 @@ function selectPayment(m){
   document.getElementById('om-option').querySelector('div').innerHTML=m==='om'?'<div style="width:10px;height:10px;border-radius:50%;background:#EA580C"></div>':'<div style="width:10px;height:10px;border-radius:50%;background:transparent"></div>';
 }
 
-function confirmOrder(){
-  document.getElementById('order-ref').textContent='Référence : #JBT-'+Math.floor(1000+Math.random()*9000);
+async function confirmOrder(){
+  if(!cart.length)return;
+  const name=document.querySelector('#checkout input[placeholder="Nom complet"]')?.value||'Client';
+  const phone=document.querySelector('#checkout input[placeholder="Téléphone"]')?.value||'+221 77 000 00 00';
+  const address=document.querySelector('#checkout input[placeholder="Adresse"]')?.value||'Dakar';
+  const total=cart.reduce((s,c)=>s+c.product.price*c.quantity,0);
+  try{
+    const order=await fetch(API_BASE+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientName:name,clientPhone:phone,clientAddress:address,paymentMethod:selectedPayment==='wave'?'Wave':'Orange Money',items:cart.map(c=>({productId:c.product.id,quantity:c.quantity}))})});
+    const data=await order.json();
+    document.getElementById('order-ref').textContent='Référence : #'+(data.reference||'CMD-'+Math.floor(1000+Math.random()*9000));
+  }catch(e){
+    document.getElementById('order-ref').textContent='Référence : #CMD-'+Math.floor(1000+Math.random()*9000);
+  }
   cart=[];updateBadge();
   showScreen('confirmation');
 }
 
-// INIT
-document.getElementById('categories-scroll').innerHTML=categories.map(c=>`<div onclick="filterByCategory('${c.name}')" style="text-align:center;cursor:pointer;min-width:76px"><div style="width:68px;height:68px;border-radius:50%;background:rgba(15,82,186,.1);overflow:hidden;margin:0 auto 6px"><img src="${c.image}" style="width:100%;height:100%;object-fit:cover"></div><p style="font-size:12px;font-weight:500;color:#0F172A">${c.name}</p></div>`).join('');
-document.getElementById('products-scroll').innerHTML=products.map(p=>productCard(p,true)).join('');
-document.getElementById('all-products').innerHTML=products.map(p=>productCard(p,false)).join('');
-document.getElementById('categories-list').innerHTML=categories.map(c=>`<div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="filterByCategory('${c.name}')"><img src="${c.image}" style="width:56px;height:56px;border-radius:10px;object-fit:cover"><div style="flex:1"><p style="font-size:16px;font-weight:700">${c.name}</p><p style="font-size:13px;color:#64748B">Produits disponibles</p></div><span class="material-symbols-outlined" style="color:#94A3B8">chevron_right</span></div>`).join('');
-renderProfileOrders();
+function renderAll(){
+  document.getElementById('categories-scroll').innerHTML=allCategories.map(c=>`<div onclick="filterByCategory('${c.name}')" style="text-align:center;cursor:pointer;min-width:76px"><div style="width:68px;height:68px;border-radius:50%;background:rgba(15,82,186,.1);overflow:hidden;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:28px">${c.icon||'📦'}</div><p style="font-size:12px;font-weight:500;color:#0F172A">${c.name}</p></div>`).join('');
+  const featured=allProducts.filter(p=>p.isFeatured);
+  document.getElementById('products-scroll').innerHTML=(featured.length?featured:allProducts).map(p=>productCard(p,true)).join('');
+  document.getElementById('all-products').innerHTML=allProducts.map(p=>productCard(p,false)).join('');
+  document.getElementById('categories-list').innerHTML=allCategories.map(c=>`<div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="filterByCategory('${c.name}')"><div style="width:56px;height:56px;border-radius:10px;background:rgba(15,82,186,.1);display:flex;align-items:center;justify-content:center;font-size:24px">${c.icon||'📦'}</div><div style="flex:1"><p style="font-size:16px;font-weight:700">${c.name}</p><p style="font-size:13px;color:#64748B">${c.productCount} produits</p></div><span class="material-symbols-outlined" style="color:#94A3B8">chevron_right</span></div>`).join('');
+  renderProfileOrders();
+}
 
-// SPLASH -> ONBOARDING after 1.8s
+loadData();
 setTimeout(()=>{showScreen('onboarding')},1800);
-
-// Hide bottom nav on non-main screens
 document.getElementById('bottom-nav').style.display='none';
 </script>
 </body>

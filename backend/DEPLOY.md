@@ -1,53 +1,24 @@
-# Guide de Déploiement - Vercel + Neon
+# Backend Local Development
 
-## 1. Configurer Neon (PostgreSQL)
+This directory contains the Express.js backup API for local development.
 
-1. Crée un compte sur [neon.tech](https://neon.tech)
-2. Crée un nouveau projet
-3. Copie la **Connection string** (format: `postgresql://...@ep-xxxxx.region.aws.neon.tech/dbname?sslmode=require`)
+## Configuration
 
-## 2. Configurer Vercel
+1. Copy `.env.example` to `.env`
+2. Set your `DATABASE_URL` (Neon PostgreSQL) and `JWT_SECRET`
+3. Run `npm install`
+4. Run seed: `npx prisma db push && npx prisma db seed` (from root)
 
-1. Installe Vercel CLI : `npm i -g vercel`
-2. Connecte-toi : `vercel login`
-3. Va dans le dossier `backend/`
-4. Lance : `vercel`
-5. Configure le projet Vercel
-
-## 3. Variables d'Environnement
-
-Dans le dashboard Vercel, ajoute :
-
-| Variable | Valeur |
-|----------|--------|
-| `DATABASE_URL` | Ta connexion Neon |
-| `JWT_SECRET` | Un secret aléatoire |
-
-## 4. Installer les dépendances et migrer
+## Running
 
 ```bash
-cd backend
-npm install
-npx prisma db push
-npm run seed
+npm start
+# or for development
+npm run dev
 ```
 
-## 5. Déployer
+The API will be available at `http://localhost:3000/api/`.
 
-```bash
-vercel --prod
-```
+## Note
 
-## 6. Mettre à jour l'app Android
-
-Dans `ApiService.kt`, remplace `BASE_URL` par ton URL Vercel :
-
-```kotlin
-const val BASE_URL = "https://ton-projet.vercel.app"
-```
-
-## 7. Tester l'API
-
-- Health: `https://ton-projet.vercel.app/api/health`
-- Produits: `https://ton-projet.vercel.app/api/products`
-- Catégories: `https://ton-projet.vercel.app/api/categories`
+For production, use the root `api/index.js` deployed on Vercel.

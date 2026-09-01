@@ -8,7 +8,11 @@ require('dotenv').config();
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'jambarrtech_secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET non défini dans .env');
+  process.exit(1);
+}
 
 app.use(cors());
 app.use(express.json());
@@ -168,6 +172,32 @@ app.delete('/api/categories/:id', authMiddleware, adminOnly, async (req, res) =>
 });
 
 // ==================== PRODUCTS ====================
+app.get('/api/products/featured', async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { isFeatured: true },
+      orderBy: { createdAt: 'desc' },
+      include: { category: true, _count: { select: { reviews: true } } }
+    });
+    res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/products/flash', async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { isFlash: true },
+      orderBy: { createdAt: 'desc' },
+      include: { category: true, _count: { select: { reviews: true } } }
+    });
+    res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/products', async (req, res) => {
   try {
     const { search, category, sort, featured, flash, limit, offset } = req.query;
@@ -304,8 +334,8 @@ app.get('/api/orders/:id', authMiddleware, async (req, res) => {
 app.post('/api/orders', async (req, res) => {
   try {
     const { clientName, clientPhone, clientAddress, items, paymentMethod } = req.body;
-    if (!clientName || !items || !items.length || !paymentMethod) {
-      return res.status(400).json({ error: 'Champs requis: clientName, items, paymentMethod' });
+    if (!clientName || !clientPhone || !items || !items.length || !paymentMethod) {
+      return res.status(400).json({ error: 'Champs requis: clientName, clientPhone, items, paymentMethod' });
     }
 
     // Calculate total
@@ -427,12 +457,17 @@ app.post('/api/reviews', async (req, res) => {
   try {
     const { productId, clientName, rating, comment } = req.body;
     if (!clientName || !comment) return res.status(400).json({ error: 'Champs requis: clientName, comment' });
+    if (rating && (rating < 1 || rating > 5)) return res.status(400).json({ error: 'Rating doit être entre 1 et 5' });
+    if (productId) {
+      const product = await prisma.product.findUnique({ where: { id: productId } });
+      if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
+    }
     const review = await prisma.review.create({
       data: {
         productId: productId || null,
-        clientName,
-        rating: rating || 5,
-        comment,
+        clientName: clientName.trim().slice(0, 100),
+        rating: Math.min(5, Math.max(1, rating || 5)),
+        comment: comment.trim().slice(0, 1000),
         status: 'pending'
       }
     });
