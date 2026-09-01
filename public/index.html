@@ -38,18 +38,76 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
     .badge-anim{animation:pulse .3s ease}
+    @keyframes spin{to{transform:rotate(360deg)}}
     ::-webkit-scrollbar{width:0;display:none}
   </style>
 </head>
 <body>
 
-<!-- HOME -->
+<!-- SPLASH -->
+<div id="splash" class="screen active" style="background:linear-gradient(135deg,#0A3C8C,#0F52BA);justify-content:center;align-items:center;color:#fff">
+  <div style="width:90px;height:90px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <span class="material-symbols-outlined filled" style="font-size:50px;color:#0F52BA">shopping_bag</span>
+  </div>
+  <h1 style="font-size:32px;font-weight:800">JambarrTech</h1>
+  <p style="font-size:14px;opacity:.8;margin-top:4px">Marketplace Premium Sénégal</p>
+  <div style="margin-top:30px;width:32px;height:32px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding" class="screen" style="background:#fff;justify-content:center;padding:24px">
+  <button onclick="showScreen('auth')" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#64748B;font-size:14px;font-weight:600;padding:8px">Passer</button>
+  <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+    <div id="onboard-icon" style="width:260px;height:260px;background:#F8FAFC;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:32px">
+      <span class="material-symbols-outlined" style="font-size:90px;color:#0F52BA">storefront</span>
+    </div>
+    <h2 id="onboard-title" style="font-size:24px;font-weight:700;color:#0F172A;margin-bottom:12px">Découvrez l'Excellence</h2>
+    <p id="onboard-desc" style="font-size:15px;color:#64748B;line-height:22px;max-width:320px">La marketplace premium au Sénégal regroupant les meilleures enseignes de mode, tech et beauté.</p>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;margin:32px 0">
+    <div id="dot0" style="width:24px;height:8px;border-radius:4px;background:#0F52BA"></div>
+    <div id="dot1" style="width:8px;height:8px;border-radius:4px;background:#E2E8F0"></div>
+    <div id="dot2" style="width:8px;height:8px;border-radius:4px;background:#E2E8F0"></div>
+  </div>
+  <button id="onboard-btn" class="btn btn-primary" onclick="nextOnboard()">Continuer</button>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="screen" style="background:#fff;padding:24px">
+  <div style="margin-top:40px">
+    <h1 style="font-size:28px;font-weight:700;color:#0F172A">Bienvenue 👋</h1>
+    <p style="font-size:15px;color:#64748B;margin-top:4px">Connectez-vous à votre compte JambarrTech</p>
+  </div>
+  <div style="margin-top:32px">
+    <label style="font-size:14px;font-weight:600;color:#0F172A;display:block;margin-bottom:8px">Numéro de téléphone</label>
+    <div style="position:relative">
+      <span class="material-symbols-outlined" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#0F52BA">phone</span>
+      <input id="phone-input" class="input" style="padding-left:44px" placeholder="+221 77 000 00 00" value="+221 77 123 45 67">
+    </div>
+  </div>
+  <button class="btn btn-primary" style="margin-top:20px" onclick="showScreen('otp')">Continuer</button>
+  <div style="display:flex;align-items:center;gap:12px;margin:24px 0"><div style="flex:1;height:1px;background:#E2E8F0"></div><span style="color:#94A3B8;font-size:13px;font-weight:600">OU</span><div style="flex:1;height:1px;background:#E2E8F0"></div></div>
+  <button class="btn btn-outline" style="gap:12px"><span class="material-symbols-outlined" style="font-size:28px;color:#0F52BA">g_mobiledata</span>Continuer avec Google</button>
+  <p style="text-align:center;margin-top:24px;color:#64748B;font-size:14px">Pas encore de compte ? <span style="color:#0F52BA;font-weight:700;cursor:pointer">S'inscrire</span></p>
+</div>
+
+<!-- OTP -->
+<div id="otp" class="screen" style="background:#fff;padding:24px">
+  <button onclick="showScreen('auth')" style="background:none;border:none;display:flex;align-items:center;gap:4px;color:#0F172A;font-size:16px;margin-bottom:24px;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+  <h1 style="font-size:26px;font-weight:700;color:#0F172A">Vérification OTP</h1>
+  <p style="font-size:15px;color:#64748B;margin-top:8px;line-height:22px">Code envoyé par SMS au numéro<br><strong id="otp-phone">+221 77 123 45 67</strong></p>
+  <input id="otp-input" class="input" style="margin-top:24px;text-align:center;font-size:24px;font-weight:700;letter-spacing:12px" maxlength="4" placeholder="0000" value="4829">
+  <button style="background:none;border:none;color:#0F52BA;font-weight:600;font-size:15px;margin-top:16px;cursor:pointer">Renvoyer le code</button>
+  <button class="btn btn-primary" style="margin-top:24px" onclick="showMainApp()">Vérifier & Connecter</button>
+</div>
+
+<!-- MAIN APP -->
 <div id="tab-home" class="screen active tab-content fade-in" style="display:flex;flex-direction:column">
   <div style="background:#fff;padding:16px 16px 12px">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div><p style="font-size:13px;color:#64748B">Bonjour</p><h2 style="font-size:18px;font-weight:700;color:#0F172A">Mamadou Diallo</h2></div>
       <div style="display:flex;gap:8px">
-        <button onclick="switchTab('profil')" style="width:40px;height:40px;border-radius:12px;background:#F1F5F9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined" style="color:#0F52BA">admin_panel_settings</span></button>
+        <button onclick="showScreen('dashboard-login')" style="width:40px;height:40px;border-radius:12px;background:#F1F5F9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined" style="color:#0F52BA">admin_panel_settings</span></button>
         <button onclick="switchTab('panier')" style="width:40px;height:40px;border-radius:12px;background:#F1F5F9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative"><span class="material-symbols-outlined" style="color:#0F52BA">shopping_bag</span><span id="cart-badge-top" class="badge" style="display:none">0</span></button>
       </div>
     </div>
@@ -196,6 +254,19 @@
   <button class="btn btn-primary" style="margin-top:32px" onclick="switchTab('home')">Continuer mes achats</button>
 </div>
 
+<!-- DASHBOARD LOGIN -->
+<div id="dashboard-login" class="screen" style="background:#F8FAFC;justify-content:center;align-items:center;padding:24px">
+  <div class="card" style="width:100%;max-width:400px;padding:24px;text-align:center">
+    <div style="width:64px;height:64px;border-radius:16px;background:#0F52BA;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><span class="material-symbols-outlined" style="font-size:36px;color:#fff">admin_panel_settings</span></div>
+    <h2 style="font-size:20px;font-weight:700">JambarrTech Dashboard</h2>
+    <p style="font-size:13px;color:#64748B;margin-top:4px">Connexion Administrateur & Gérant</p>
+    <input class="input" style="margin-top:20px" placeholder="Email ou téléphone" value="admin@jambarrtech.com">
+    <input class="input" type="password" style="margin-top:12px" placeholder="Mot de passe" value="********">
+    <button class="btn btn-primary" style="margin-top:16px" onclick="window.open('/web-dashboard/','_blank')">Se connecter</button>
+    <button onclick="switchTab('home')" style="background:none;border:none;color:#0F52BA;font-size:13px;margin-top:16px;cursor:pointer">Retour à l'application mobile</button>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <div id="bottom-nav" class="bottom-nav">
   <button onclick="switchTab('home')" class="active" data-tab="home"><span class="material-symbols-outlined">home</span>Accueil</button>
@@ -206,7 +277,13 @@
 </div>
 
 <script>
-let cart=[],favorites=[],selectedPayment='wave';
+let cart=[],favorites=[],selectedPayment='wave',onboardStep=0;
+
+const onboardData=[
+  {icon:'storefront',title:"Découvrez l'Excellence",desc:"La marketplace premium au Sénégal regroupant les meilleures enseignes de mode, tech et beauté."},
+  {icon:'local_mall',title:"Produits & Boutiques Certifiés",desc:"Parcourez des milliers d'articles de mode, tech, maison et beauté, livrés directement chez vous à Dakar."},
+  {icon:'payment',title:"Paiement Wave & Orange Money",desc:"Payez en un clic via Wave ou Orange Money, sans carte bancaire, en toute sécurité."}
+];
 
 const categories=[
   {id:'1',name:'Mode',image:'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=200&q=80'},
@@ -236,6 +313,22 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none'});
   const el=document.getElementById(id);
   if(el){el.classList.add('active');el.style.display='flex'}
+}
+
+function showMainApp(){
+  showScreen('tab-home');
+  document.getElementById('bottom-nav').style.display='flex';
+}
+
+function nextOnboard(){
+  onboardStep++;
+  if(onboardStep>=3){showScreen('auth');return}
+  const d=onboardData[onboardStep];
+  document.getElementById('onboard-icon').innerHTML=`<span class="material-symbols-outlined" style="font-size:90px;color:#0F52BA">${d.icon}</span>`;
+  document.getElementById('onboard-title').textContent=d.title;
+  document.getElementById('onboard-desc').textContent=d.desc;
+  document.getElementById('onboard-btn').textContent=onboardStep===2?'Commencer':'Continuer';
+  for(let i=0;i<3;i++){const dot=document.getElementById('dot'+i);dot.style.width=i===onboardStep?'24px':'8px';dot.style.background=i===onboardStep?'#0F52BA':'#E2E8F0'}
 }
 
 function switchTab(tab){
@@ -363,6 +456,12 @@ document.getElementById('products-scroll').innerHTML=products.map(p=>productCard
 document.getElementById('all-products').innerHTML=products.map(p=>productCard(p,false)).join('');
 document.getElementById('categories-list').innerHTML=categories.map(c=>`<div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="filterByCategory('${c.name}')"><img src="${c.image}" style="width:56px;height:56px;border-radius:10px;object-fit:cover"><div style="flex:1"><p style="font-size:16px;font-weight:700">${c.name}</p><p style="font-size:13px;color:#64748B">Produits disponibles</p></div><span class="material-symbols-outlined" style="color:#94A3B8">chevron_right</span></div>`).join('');
 renderProfileOrders();
+
+// SPLASH -> ONBOARDING after 1.8s
+setTimeout(()=>{showScreen('onboarding')},1800);
+
+// Hide bottom nav on non-main screens
+document.getElementById('bottom-nav').style.display='none';
 </script>
 </body>
 </html>
