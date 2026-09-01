@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "JambarrTech - E-commerce Sénégal",
   "scripts": {
-    "vercel-build": "npx prisma generate",
+    "postinstall": "prisma generate",
     "seed": "node prisma/seed.js",
     "db:push": "npx prisma db push"
   },
