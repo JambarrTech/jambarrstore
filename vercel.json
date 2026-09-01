@@ -1,5 +1,6 @@
 {
   "installCommand": "npm install --ignore-scripts && npx prisma generate",
+  "outputDirectory": ".",
   "framework": null,
   "headers": [
     {
