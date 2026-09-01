@@ -1,6 +1,6 @@
 {
   "installCommand": "npm install --ignore-scripts",
-  "buildCommand": "npx prisma generate",
+  "buildCommand": "npx prisma generate --schema=./prisma/schema.prisma",
   "framework": null,
   "outputDirectory": "public",
   "headers": [
