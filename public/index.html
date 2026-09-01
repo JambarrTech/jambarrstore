@@ -1,603 +1,495 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>JambarrTech • Application iPhone & Mobile</title>
+  <title>JambarrTech</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0F52BA">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="JambarrShop">
-  <link rel="apple-touch-icon" href="/icon.svg">
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#F8FAFC;overflow:hidden;height:100dvh}
+    .screen{display:none;flex-direction:column;height:100dvh;width:100%;position:absolute;top:0;left:0;background:#F8FAFC;overflow-y:auto}
+    .screen.active{display:flex}
+    .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    .filled{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .btn{width:100%;height:50px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s}
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:#0F52BA;color:#fff}
+    .btn-outline{background:transparent;border:2px solid #0F52BA;color:#0F52BA}
+    .card{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .input{width:100%;height:50px;border:1.5px solid #E2E8F0;border-radius:12px;padding:0 16px;font-size:15px;outline:none;transition:border .2s}
+    .input:focus{border-color:#0F52BA}
+    .badge{background:#0F52BA;color:#fff;font-size:11px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;position:absolute;top:-4px;right:-4px}
+    .bottom-nav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:6px 0 env(safe-area-inset-bottom,8px);position:fixed;bottom:0;width:100%;z-index:100}
+    .bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;padding:4px;color:#94A3B8;font-size:10px;font-weight:600;cursor:pointer;position:relative}
+    .bottom-nav button.active{color:#0F52BA}
+    .bottom-nav button .material-symbols-outlined{font-size:22px}
+    .tab-content{padding-bottom:70px;flex:1;overflow-y:auto}
+    .promo-card{background:linear-gradient(135deg,#0A3C8C,#0F52BA);border-radius:16px;padding:20px;color:#fff;position:relative;overflow:hidden}
+    .product-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+    .product-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s}
+    .product-card:active{transform:scale(.97)}
+    .fade-in{animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+    .badge-anim{animation:pulse .3s ease}
+    .slide-in{animation:slideIn .3s ease}
+    @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    .status-badge{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;display:inline-block}
+    ::-webkit-scrollbar{width:0;display:none}
+  </style>
 </head>
-<body class="h-full bg-slate-100 font-sans text-slate-900 flex justify-center items-center">
-  <!-- iPhone Frame Mockup Container -->
-  <div class="w-full max-w-md h-full md:h-[850px] md:rounded-[40px] md:border-[10px] md:border-slate-800 bg-white shadow-2xl flex flex-col overflow-hidden relative">
-    
-    <!-- Dynamic Island / Header -->
-    <div class="bg-gradient-to-r from-[#0A3C8C] to-[#0F52BA] text-white px-5 pt-10 pb-4 flex justify-between items-center shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-white text-[#0F52BA] rounded-xl flex items-center justify-center font-black text-base shadow">JT</div>
-        <div>
-          <div class="flex items-center gap-1.5">
-            <h1 class="text-base font-black tracking-tight">jambarr SHOP</h1>
-          </div>
-          <p class="text-[9px] text-white/80 font-medium tracking-wider uppercase">Crée • Gère • Vends • Développe</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="w-9 h-9 flex items-center justify-center bg-white/20 rounded-full relative hover:bg-white/30 transition">
-          <span class="material-symbols-outlined text-white text-sm">notifications</span>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-      </div>
-    </div>
+<body>
 
-    <!-- Search Bar -->
-    <div class="p-4 bg-white border-b border-slate-100">
-      <div class="flex items-center bg-slate-100 rounded-xl px-4 h-11 border border-slate-200">
-        <span class="material-symbols-outlined text-slate-400 mr-2">search</span>
-        <input type="text" placeholder="Rechercher un produit (AirPods, iPhone...)" class="bg-transparent border-none outline-none text-sm w-full">
-      </div>
-    </div>
-
-    <!-- Interactive Filter Bar -->
-    <div class="px-4 py-2.5 bg-white border-b border-slate-200 flex gap-2 overflow-x-auto scrollbar-none">
-      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-full shadow-sm flex-shrink-0 transition">Tous</button>
-      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Populaires</button>
-      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Prix croissant</button>
-      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Nouveautés</button>
-      <button onclick="setActiveFilter(this)" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition">Ventes Flash</button>
-    </div>
-
-    <script>
-      function setActiveFilter(btn) {
-        const buttons = btn.parentElement.querySelectorAll('button');
-        buttons.forEach(b => {
-          b.className = "px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full flex-shrink-0 transition";
-        });
-        btn.className = "px-4 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-full shadow-sm flex-shrink-0 transition";
-      }
-
-      // Product Database with Multi-Images
-      const productsData = {
-        'airpods': {
-          name: 'AirPods Max',
-          price: '345.000 FCFA',
-          oldPrice: '395.000 FCFA',
-          badge: '-12%',
-          rating: '4.9 (124 avis)',
-          description: 'Casque audio sans fil haute fidélité avec réduction active du bruit et mode transparence.',
-          images: [
-            'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&auto=format&fit=crop&q=80'
-          ]
-        },
-        'watch': {
-          name: 'Apple Watch Ultra',
-          price: '415.000 FCFA',
-          oldPrice: '450.000 FCFA',
-          badge: '-8%',
-          rating: '4.8 (98 avis)',
-          description: 'Montre connectée robuste conçue pour l’endurance, l’aventure et les sports extrêmes.',
-          images: [
-            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=600&auto=format&fit=crop&q=80'
-          ]
-        },
-        'macbook': {
-          name: 'MacBook Pro M3',
-          price: '1.250.000 FCFA',
-          oldPrice: '1.350.000 FCFA',
-          badge: 'Pro',
-          rating: '5.0 (42 avis)',
-          description: 'Ordinateur portable surpuissant propulsé par la puce M3 Pro pour les professionnels exigeants.',
-          images: [
-            'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop&q=80'
-          ]
-        },
-        'iphone': {
-          name: 'iPhone 15 Pro Max',
-          price: '890.000 FCFA',
-          oldPrice: '990.000 FCFA',
-          badge: '-15%',
-          rating: '4.9 (215 avis)',
-          description: 'Design en titane aérospatial, puce A17 Pro révolutionnaire et système photo pro avancé.',
-          images: [
-            'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80'
-          ]
-        }
-      };
-
-      function openProduct(key) {
-        currentProductKey = key;
-        const prod = productsData[key];
-        if (!prod) return;
-
-        document.getElementById('modalTitle').innerText = prod.name;
-        document.getElementById('modalPrice').innerText = prod.price;
-        document.getElementById('modalOldPrice').innerText = prod.oldPrice;
-        document.getElementById('modalBadge').innerText = prod.badge;
-        document.getElementById('modalRating').innerText = prod.rating;
-        document.getElementById('modalDesc').innerText = prod.description;
-
-        const mainImg = document.getElementById('modalMainImage');
-        mainImg.innerHTML = `<img src="${prod.images[0]}" class="w-full h-full object-cover rounded-2xl" alt="${prod.name}">`;
-
-        const thumbsContainer = document.getElementById('modalThumbnails');
-        thumbsContainer.innerHTML = '';
-        prod.images.forEach((imgUrl, index) => {
-          const thumb = document.createElement('div');
-          thumb.className = `w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 ${index === 0 ? 'border-[#0F52BA]' : 'border-slate-200'}`;
-          thumb.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover" alt="thumb">`;
-          thumb.onclick = () => {
-            mainImg.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-2xl" alt="${prod.name}">`;
-            thumbsContainer.querySelectorAll('div').forEach(d => d.className = 'w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 border-slate-200');
-            thumb.className = 'w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer flex-shrink-0 border-[#0F52BA]';
-          };
-          thumbsContainer.appendChild(thumb);
-        });
-
-        document.getElementById('productModal').classList.remove('hidden');
-      }
-
-      function closeProductModal() {
-        document.getElementById('productModal').classList.add('hidden');
-      }
-
-      let currentProductKey = null;
-      let cartItems = [
-        { key: 'airpods', name: 'AirPods Max', price: 345000, priceStr: '345.000 FCFA', qty: 1, image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80' },
-        { key: 'watch', name: 'Apple Watch Ultra', price: 415000, priceStr: '415.000 FCFA', qty: 1, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80' }
-      ];
-
-      function addCurrentToCart() {
-        if (!currentProductKey) return;
-        const prod = productsData[currentProductKey];
-        const existing = cartItems.find(i => i.key === currentProductKey);
-        const numericPrice = parseInt(prod.price.replace(/\D/g, ''));
-        if (existing) {
-          existing.qty += 1;
-        } else {
-          cartItems.push({
-            key: currentProductKey,
-            name: prod.name,
-            price: numericPrice,
-            priceStr: prod.price,
-            qty: 1,
-            image: prod.images[0]
-          });
-        }
-        updateCartBadge();
-        closeProductModal();
-        alert('Produit ajouté au panier avec succès !');
-      }
-
-      function updateCartBadge() {
-        const totalQty = cartItems.reduce((acc, item) => acc + item.qty, 0);
-        const badges = document.querySelectorAll('.cart-badge');
-        badges.forEach(b => b.innerText = totalQty);
-      }
-
-      function openCartModal() {
-        renderCart();
-        document.getElementById('cartModal').classList.remove('hidden');
-      }
-
-      function closeCartModal() {
-        document.getElementById('cartModal').classList.add('hidden');
-      }
-
-      function changeQty(key, delta) {
-        const item = cartItems.find(i => i.key === key);
-        if (!item) return;
-        item.qty += delta;
-        if (item.qty <= 0) {
-          cartItems = cartItems.filter(i => i.key !== key);
-        }
-        renderCart();
-        updateCartBadge();
-      }
-
-      function renderCart() {
-        const container = document.getElementById('cartItemsContainer');
-        const summaryContainer = document.getElementById('cartSummaryTotal');
-        if (cartItems.length === 0) {
-          container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">Votre panier est vide 🛒</div>`;
-          summaryContainer.innerText = '0 FCFA';
-          return;
-        }
-        let html = '';
-        let total = 0;
-        cartItems.forEach(item => {
-          total += item.price * item.qty;
-          html += `
-            <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-              <img src="${item.image}" class="w-12 h-12 object-cover rounded-lg" alt="${item.name}">
-              <div class="flex-1">
-                <h4 class="font-bold text-xs text-slate-800">${item.name}</h4>
-                <p class="text-xs font-extrabold text-[#0F52BA] mt-0.5">${item.priceStr}</p>
-              </div>
-              <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200">
-                <button onclick="changeQty('${item.key}', -1)" class="text-slate-500 font-bold px-1 text-xs">-</button>
-                <span class="text-xs font-bold">${item.qty}</span>
-                <button onclick="changeQty('${item.key}', 1)" class="text-slate-500 font-bold px-1 text-xs">+</button>
-              </div>
-            </div>
-          `;
-        });
-        container.innerHTML = html;
-        summaryContainer.innerText = total.toLocaleString() + ' FCFA';
-      }
-
-      function submitCheckout(e) {
-        e.preventDefault();
-        if (cartItems.length === 0) {
-          alert('Votre panier est vide !');
-          return;
-        }
-        const fullName = document.getElementById('checkoutName').value;
-        const phone = document.getElementById('checkoutPhone').value;
-        const address = document.getElementById('checkoutAddress').value;
-        const paymentInput = document.querySelector('input[name="paymentMethod"]:checked');
-        const paymentMethod = paymentInput ? paymentInput.value : 'wave';
-
-        alert(`Commande validée avec succès !\n\nClient : ${fullName}\nTéléphone : ${phone}\nAdresse : ${address}\nPaiement via : ${paymentMethod.toUpperCase()}\n\nMerci d'avoir commandé sur JambarrShop !`);
-        cartItems = [];
-        updateCartBadge();
-        closeCartModal();
-      }
-    </script>
-
-    <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
-      
-      <!-- Flash Sale Banner -->
-      <div class="bg-gradient-to-r from-[#0A3C8C] to-[#0F52BA] rounded-2xl p-5 text-white relative overflow-hidden shadow-lg">
-        <div class="relative z-10">
-          <div class="flex items-center justify-between">
-            <span class="px-2.5 py-1 bg-white/20 text-white text-[10px] font-bold rounded-full uppercase">⚡ Vente Flash -20%</span>
-            <span class="text-xs bg-red-600 px-2 py-0.5 rounded-md font-bold">Fin dans 04:12:35</span>
-          </div>
-          <h3 class="text-xl font-extrabold mt-2">AirPods Max & Ultra Watch</h3>
-          <p class="text-xs text-white/80 mt-1">Offre limitée valable sur l'application iPhone & Mobile</p>
-          <button onclick="openProduct('airpods')" class="mt-4 px-4 py-2 bg-white text-[#0F52BA] font-bold text-xs rounded-xl shadow">Acheter maintenant</button>
-        </div>
-        <div class="absolute -right-6 -bottom-6 text-7xl opacity-20">🎧</div>
-      </div>
-
-      <!-- Official Stores / Brands Section -->
-      <div>
-        <h3 class="text-sm font-bold text-slate-800 mb-3">Boutiques Officielles</h3>
-        <div class="grid grid-cols-4 gap-3">
-          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
-            <span class="text-2xl">🍏</span>
-            <span class="text-[10px] font-bold text-slate-700 mt-1">Apple</span>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
-            <span class="text-2xl">📱</span>
-            <span class="text-[10px] font-bold text-slate-700 mt-1">Samsung</span>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
-            <span class="text-2xl">⚡</span>
-            <span class="text-[10px] font-bold text-slate-700 mt-1">Xiaomi</span>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm cursor-pointer hover:border-[#0F52BA]">
-            <span class="text-2xl">👟</span>
-            <span class="text-[10px] font-bold text-slate-700 mt-1">Nike</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Categories -->
-      <div>
-        <h3 class="text-sm font-bold text-slate-800 mb-3">Catégories Populaires</h3>
-        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div class="w-14 h-14 bg-blue-50 text-[#0F52BA] rounded-2xl flex items-center justify-center border border-blue-200 font-bold">📱</div>
-            <span class="text-[11px] font-bold text-slate-700">High-Tech</span>
-          </div>
-          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">👕</div>
-            <span class="text-[11px] font-bold text-slate-600">Mode</span>
-          </div>
-          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">🏠</div>
-            <span class="text-[11px] font-bold text-slate-600">Maison</span>
-          </div>
-          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">🧴</div>
-            <span class="text-[11px] font-bold text-slate-600">Beauté</span>
-          </div>
-          <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
-            <div class="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center">⚽</div>
-            <span class="text-[11px] font-bold text-slate-600">Sport</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Popular Products Grid -->
-      <div>
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-bold text-slate-800">Produits Populaires</h3>
-          <span class="text-xs font-bold text-[#0F52BA]">Voir tout</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <!-- AirPods Max Card -->
-          <div onclick="openProduct('airpods')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="AirPods Max">
-              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-12%</span>
-            </div>
-            <div class="mt-2">
-              <h4 class="text-xs font-bold text-slate-800 truncate">AirPods Max</h4>
-              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">345.000 FCFA</p>
-              <button onclick="event.stopPropagation(); openProduct('airpods');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
-            </div>
-          </div>
-
-          <!-- Apple Watch Ultra Card -->
-          <div onclick="openProduct('watch')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Apple Watch Ultra">
-              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-8%</span>
-            </div>
-            <div class="mt-2">
-              <h4 class="text-xs font-bold text-slate-800 truncate">Apple Watch Ultra</h4>
-              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">415.000 FCFA</p>
-              <button onclick="event.stopPropagation(); openProduct('watch');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Customer Reviews Section -->
-      <div>
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-bold text-slate-800">Avis des clients</h3>
-          <span class="text-xs font-bold text-[#0F52BA]">4.8 / 5.0</span>
-        </div>
-        <div class="space-y-3">
-          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0F52BA] font-bold flex items-center justify-center text-xs">MD</div>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-800">Mamadou Diallo</h4>
-                  <p class="text-[10px] text-slate-400">Achat vérifié • Il y a 2 jours</p>
-                </div>
-              </div>
-              <div class="flex text-amber-400 text-xs">★★★★★</div>
-            </div>
-            <p class="text-xs text-slate-600">"Super service ! AirPods Max reçus en moins de 24h à Dakar, emballage nickel et produit authentique."</p>
-          </div>
-
-          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0F52BA] font-bold flex items-center justify-center text-xs">FN</div>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-800">Fatou Ndiaye</h4>
-                  <p class="text-[10px] text-slate-400">Achat vérifié • Il y a 5 jours</p>
-                </div>
-              </div>
-              <div class="flex text-amber-400 text-xs">★★★★★</div>
-            </div>
-            <p class="text-xs text-slate-600">"Paiement super simple avec Wave, livraison express irréprochable. Je recommande vivement JambarrTech !"</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- High-Tech & Laptops Section -->
-      <div>
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-bold text-slate-800">High-Tech & Ordinateurs</h3>
-          <span class="text-xs font-bold text-[#0F52BA]">Voir tout</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <!-- MacBook Pro M3 Card -->
-          <div onclick="openProduct('macbook')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="MacBook Pro M3">
-              <span class="absolute top-2 left-2 px-2 py-0.5 bg-blue-600 text-white text-[9px] font-bold rounded-md">Pro</span>
-            </div>
-            <div class="mt-2">
-              <h4 class="text-xs font-bold text-slate-800 truncate">MacBook Pro M3</h4>
-              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">1.250.000 FCFA</p>
-              <button onclick="event.stopPropagation(); openProduct('macbook');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
-            </div>
-          </div>
-
-          <!-- iPhone 15 Pro Max Card -->
-          <div onclick="openProduct('iphone')" class="group bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between shadow-sm cursor-pointer hover:border-[#0F52BA] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-            <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="iPhone 15 Pro Max">
-              <span class="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded-md">-15%</span>
-            </div>
-            <div class="mt-2">
-              <h4 class="text-xs font-bold text-slate-800 truncate">iPhone 15 Pro Max</h4>
-              <p class="text-sm font-extrabold text-[#0F52BA] mt-1">890.000 FCFA</p>
-              <button onclick="event.stopPropagation(); openProduct('iphone');" class="w-full mt-2 py-1.5 bg-[#0F52BA] text-white text-xs font-bold rounded-xl shadow">Voir photos</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Express Delivery & Club Jambarr Benefits -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
-        <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider">🚀 Club Jambarr Express</h4>
-        <p class="text-xs text-blue-700 mt-1">Livraison garantie en moins de 24h à Dakar et banlieue, avec suivi en temps réel.</p>
-        <div class="mt-3 flex gap-2">
-          <span class="px-3 py-1 bg-white text-[#0F52BA] text-[10px] font-bold rounded-lg shadow-sm">Livraison Gratuite dès 50k</span>
-          <span class="px-3 py-1 bg-white text-[#0F52BA] text-[10px] font-bold rounded-lg shadow-sm">Garantie 1 An</span>
-        </div>
-      </div>
-
-      <!-- Payment Methods Banner -->
-      <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold text-emerald-800">Paiement Mobile Sécurisé</p>
-          <p class="text-[11px] text-emerald-600">Wave & Orange Money acceptés</p>
-        </div>
-        <div class="flex gap-2">
-          <span class="px-2.5 py-1 bg-blue-500 text-white text-xs font-bold rounded-lg">Wave</span>
-          <span class="px-2.5 py-1 bg-orange-600 text-white text-xs font-bold rounded-lg">OM</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Product Detail Modal with Multi-Image Gallery -->
-    <div id="productModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end backdrop-blur-sm transition-all">
-      <div class="bg-white rounded-t-[30px] p-6 max-h-[85%] flex flex-col shadow-2xl animate-slide-up relative">
-        <!-- Close Button -->
-        <button onclick="closeProductModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold">✕</button>
-        
-        <!-- Main Image Preview -->
-        <div id="modalMainImage" class="w-full aspect-square bg-slate-100 rounded-2xl overflow-hidden shadow-md mb-3 flex items-center justify-center">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- Thumbnails Gallery -->
-        <div class="mb-4">
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Galerie Photos du Produit</p>
-          <div id="modalThumbnails" class="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <!-- Product Info -->
-        <div class="flex-1 overflow-y-auto space-y-2 mb-4">
-          <div class="flex justify-between items-start">
-            <div>
-              <span id="modalBadge" class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-md uppercase"></span>
-              <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mt-1"></h3>
-            </div>
-            <div class="text-right">
-              <p id="modalPrice" class="text-lg font-extrabold text-[#0F52BA]"></p>
-              <p id="modalOldPrice" class="text-xs text-slate-400 line-through"></p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 text-xs text-amber-500 font-bold">
-            <span>★</span> <span id="modalRating"></span>
-          </div>
-          <p id="modalDesc" class="text-xs text-slate-600 leading-relaxed"></p>
-        </div>
-
-        <!-- Action Button -->
-        <button onclick="addCurrentToCart()" class="w-full py-3 bg-[#0F52BA] text-white font-bold rounded-2xl shadow-lg hover:bg-blue-800 transition">
-          Ajouter au Panier 🛒
-        </button>
-      </div>
-    </div>
-
-    <!-- Cart & Checkout Modal -->
-    <div id="cartModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end backdrop-blur-sm transition-all">
-      <div class="bg-white rounded-t-[30px] p-6 max-h-[90%] flex flex-col shadow-2xl relative">
-        <button onclick="closeCartModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 font-bold">✕</button>
-        
-        <h3 class="font-extrabold text-base text-slate-800 mb-4 flex items-center gap-2">
-          <span>🛒</span> Mon Panier & Validation (Checkout)
-        </h3>
-
-        <div class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1">
-          <!-- Dynamic Cart Items -->
-          <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. Résumé des Produits</p>
-            <div id="cartItemsContainer" class="space-y-2">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <hr class="border-slate-100">
-
-          <!-- Delivery Address Form -->
-          <form id="checkoutForm" onsubmit="submitCheckout(event)" class="space-y-3">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Adresse de Livraison</p>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="text-[10px] font-bold text-slate-600">Nom complet</label>
-                <input type="text" id="checkoutName" required placeholder="Amadou Ba" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-slate-600">Téléphone</label>
-                <input type="tel" id="checkoutPhone" required placeholder="+221 77..." class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
-              </div>
-            </div>
-            <div>
-              <label class="text-[10px] font-bold text-slate-600">Quartier / Adresse de Livraison</label>
-              <input type="text" id="checkoutAddress" required placeholder="Almadies, Dakar" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0F52BA]">
-            </div>
-
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider pt-2">3. Mode de Paiement</p>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="flex items-center gap-3 p-3 border-2 border-blue-500 bg-blue-50/50 rounded-xl cursor-pointer">
-                <input type="radio" name="paymentMethod" value="wave" checked class="text-[#0F52BA]">
-                <div>
-                  <p class="font-bold text-xs text-slate-800">Wave</p>
-                  <p class="text-[9px] text-blue-600">Paiement instantané</p>
-                </div>
-              </label>
-              <label class="flex items-center gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-orange-500">
-                <input type="radio" name="paymentMethod" value="orange" class="text-orange-600">
-                <div>
-                  <p class="font-bold text-xs text-slate-800">Orange Money</p>
-                  <p class="text-[9px] text-orange-600">Sécurisé USSD</p>
-                </div>
-              </label>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center mt-4">
-              <span class="text-xs font-bold text-slate-600">Total à payer :</span>
-              <span id="cartSummaryTotal" class="text-base font-extrabold text-[#0F52BA]">0 FCFA</span>
-            </div>
-
-            <button type="submit" class="w-full py-3 bg-[#0F52BA] text-white font-bold rounded-2xl shadow-lg hover:bg-blue-800 transition text-sm">
-              Valider et Payer la Commande 🚀
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Navigation Bar -->
-    <nav class="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 px-6 flex items-center justify-between shadow-lg">
-      <button class="flex flex-col items-center text-[#0F52BA]">
-        <span class="material-symbols-outlined text-xl">home</span>
-        <span class="text-[9px] font-bold uppercase">Accueil</span>
-      </button>
-      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
-        <span class="material-symbols-outlined text-xl">category</span>
-        <span class="text-[9px] font-bold uppercase">Catégories</span>
-      </button>
-      <button onclick="openCartModal()" class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA] relative cursor-pointer">
-        <span class="material-symbols-outlined text-xl">shopping_cart</span>
-        <span class="text-[9px] font-bold uppercase">Panier</span>
-        <span class="cart-badge absolute -top-1 -right-2 w-4 h-4 bg-[#0F52BA] text-white text-[9px] flex items-center justify-center rounded-full font-bold">2</span>
-      </button>
-      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
-        <span class="material-symbols-outlined text-xl">favorite</span>
-        <span class="text-[9px] font-bold uppercase">Favoris</span>
-      </button>
-      <button class="flex flex-col items-center text-slate-400 hover:text-[#0F52BA]">
-        <span class="material-symbols-outlined text-xl">person</span>
-        <span class="text-[9px] font-bold uppercase">Profil</span>
-      </button>
-    </nav>
-
+<!-- SPLASH -->
+<div id="splash" class="screen active" style="background:linear-gradient(135deg,#0A3C8C,#0F52BA);justify-content:center;align-items:center;color:#fff">
+  <div style="width:90px;height:90px;background:#fff;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <span class="material-symbols-outlined filled" style="font-size:50px;color:#0F52BA">shopping_bag</span>
   </div>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
-    }
-  </script>
+  <h1 style="font-size:32px;font-weight:800">JambarrTech</h1>
+  <p style="font-size:14px;opacity:.8;margin-top:4px">Marketplace Premium Sénégal</p>
+  <div style="margin-top:30px;width:32px;height:32px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite"></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding" class="screen" style="background:#fff;justify-content:center;padding:24px">
+  <button onclick="showScreen('auth')" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#64748B;font-size:14px;font-weight:600;padding:8px">Passer</button>
+  <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+    <div id="onboard-icon" style="width:260px;height:260px;background:#F8FAFC;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:32px">
+      <span class="material-symbols-outlined" style="font-size:90px;color:#0F52BA">storefront</span>
+    </div>
+    <h2 id="onboard-title" style="font-size:24px;font-weight:700;color:#0F172A;margin-bottom:12px">Découvrez l'Excellence</h2>
+    <p id="onboard-desc" style="font-size:15px;color:#64748B;line-height:22px;max-width:320px">La marketplace premium au Sénégal regroupant les meilleures enseignes de mode, tech et beauté.</p>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;margin:32px 0">
+    <div id="dot0" style="width:24px;height:8px;border-radius:4px;background:#0F52BA"></div>
+    <div id="dot1" style="width:8px;height:8px;border-radius:4px;background:#E2E8F0"></div>
+    <div id="dot2" style="width:8px;height:8px;border-radius:4px;background:#E2E8F0"></div>
+  </div>
+  <button id="onboard-btn" class="btn btn-primary" onclick="nextOnboard()">Continuer</button>
+</div>
+
+<!-- AUTH -->
+<div id="auth" class="screen" style="background:#fff;padding:24px">
+  <div style="margin-top:40px">
+    <h1 style="font-size:28px;font-weight:700;color:#0F172A">Bienvenue 👋</h1>
+    <p style="font-size:15px;color:#64748B;margin-top:4px">Connectez-vous à votre compte JambarrTech</p>
+  </div>
+  <div style="margin-top:32px">
+    <label style="font-size:14px;font-weight:600;color:#0F172A;display:block;margin-bottom:8px">Numéro de téléphone</label>
+    <div style="position:relative">
+      <span class="material-symbols-outlined" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#0F52BA">phone</span>
+      <input id="phone-input" class="input" style="padding-left:44px" placeholder="+221 77 000 00 00" value="+221 77 123 45 67">
+    </div>
+  </div>
+  <button class="btn btn-primary" style="margin-top:20px" onclick="showScreen('otp')">Continuer</button>
+  <div style="display:flex;align-items:center;gap:12px;margin:24px 0"><div style="flex:1;height:1px;background:#E2E8F0"></div><span style="color:#94A3B8;font-size:13px;font-weight:600">OU</span><div style="flex:1;height:1px;background:#E2E8F0"></div></div>
+  <button class="btn btn-outline" style="gap:12px"><span class="material-symbols-outlined" style="font-size:28px;color:#0F52BA">g_mobiledata</span>Continuer avec Google</button>
+  <p style="text-align:center;margin-top:24px;color:#64748B;font-size:14px">Pas encore de compte ? <span style="color:#0F52BA;font-weight:700;cursor:pointer">S'inscrire</span></p>
+</div>
+
+<!-- OTP -->
+<div id="otp" class="screen" style="background:#fff;padding:24px">
+  <button onclick="showScreen('auth')" style="background:none;border:none;display:flex;align-items:center;gap:4px;color:#0F172A;font-size:16px;margin-bottom:24px;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+  <h1 style="font-size:26px;font-weight:700;color:#0F172A">Vérification OTP</h1>
+  <p style="font-size:15px;color:#64748B;margin-top:8px;line-height:22px">Code envoyé par SMS au numéro<br><strong id="otp-phone">+221 77 123 45 67</strong></p>
+  <input id="otp-input" class="input" style="margin-top:24px;text-align:center;font-size:24px;font-weight:700;letter-spacing:12px" maxlength="4" placeholder="0000" value="4829">
+  <button style="background:none;border:none;color:#0F52BA;font-weight:600;font-size:15px;margin-top:16px;cursor:pointer">Renvoyer le code</button>
+  <button class="btn btn-primary" style="margin-top:24px" onclick="showMainApp()">Vérifier & Connecter</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" class="screen" style="background:#F8FAFC">
+  <!-- HOME -->
+  <div id="tab-home" class="tab-content fade-in" style="display:flex;flex-direction:column">
+    <div style="background:#fff;padding:16px 16px 12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><p style="font-size:13px;color:#64748B">Bonjour</p><h2 style="font-size:18px;font-weight:700;color:#0F172A">Mamadou Diallo</h2></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="switchTab('profil')" style="width:40px;height:40px;border-radius:12px;background:#F1F5F9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined" style="color:#0F52BA">admin_panel_settings</span></button>
+          <button onclick="switchTab('panier')" style="width:40px;height:40px;border-radius:12px;background:#F1F5F9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative"><span class="material-symbols-outlined" style="color:#0F52BA">shopping_bag</span><span id="cart-badge-top" class="badge" style="display:none">0</span></button>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px;margin-top:12px">
+      <div onclick="showScreen('search-screen')" style="background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer">
+        <span class="material-symbols-outlined" style="color:#94A3B8">search</span>
+        <span style="color:#94A3B8;font-size:14px">Rechercher un produit, une marque...</span>
+      </div>
+    </div>
+    <div style="padding:16px 0 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:12px"><h3 style="font-size:18px;font-weight:700;color:#0F172A">Catégories</h3><button onclick="switchTab('categories')" style="background:none;border:none;color:#0F52BA;font-size:14px;font-weight:600;cursor:pointer">Voir tout</button></div>
+      <div id="categories-scroll" style="display:flex;gap:12px;overflow-x:auto;padding:0 16px;scrollbar-width:none"></div>
+    </div>
+    <div style="padding:16px">
+      <div class="promo-card">
+        <div style="background:rgba(255,255,255,.2);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:12px">OFFRE SPÉCIALE -20%</div>
+        <h3 style="font-size:22px;font-weight:700">Soldes Tech & Mode</h3>
+        <p style="font-size:13px;opacity:.9;margin-top:4px">Profitez de la livraison gratuite dès 50 000 FCFA</p>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px">
+      <h3 style="font-size:18px;font-weight:700;color:#0F172A;margin-bottom:12px">Produits Populaires</h3>
+      <div id="products-scroll" style="display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px"></div>
+    </div>
+    <div style="padding:0 16px 16px">
+      <h3 style="font-size:18px;font-weight:700;color:#0F172A;margin-bottom:12px">Tous les Produits</h3>
+      <div id="all-products" class="product-grid"></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div id="tab-categories" class="tab-content" style="display:none;flex-direction:column">
+    <div style="background:#fff;padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0">
+      <button onclick="switchTab('home')" style="background:none;border:none;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+      <h2 style="font-size:20px;font-weight:700">Catégories</h2>
+    </div>
+    <div id="categories-list" style="padding:16px;display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+
+  <!-- PANIER -->
+  <div id="tab-panier" class="tab-content" style="display:none;flex-direction:column">
+    <div style="background:#fff;padding:16px;border-bottom:1px solid #E2E8F0"><h2 style="font-size:22px;font-weight:700">Mon Panier</h2></div>
+    <div id="cart-items" style="flex:1;overflow-y:auto;padding:16px"></div>
+    <div id="cart-summary" style="background:#fff;padding:16px;border-top:1px solid #E2E8F0;display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:#64748B">Sous-total</span><span id="subtotal" style="font-weight:600"></span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:#64748B">Livraison</span><span style="font-weight:600">2 000 FCFA</span></div>
+      <div style="height:1px;background:#E2E8F0;margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="font-size:16px;font-weight:700">Total</span><span id="total" style="font-size:18px;font-weight:800;color:#0F52BA"></span></div>
+      <button class="btn btn-primary" onclick="showScreen('checkout')">Passer la commande</button>
+    </div>
+  </div>
+
+  <!-- FAVORIS -->
+  <div id="tab-favoris" class="tab-content" style="display:none;flex-direction:column">
+    <div style="background:#fff;padding:16px;border-bottom:1px solid #E2E8F0"><h2 style="font-size:22px;font-weight:700">Mes Favoris</h2></div>
+    <div id="favorites-content" style="flex:1;overflow-y:auto;padding:16px"></div>
+  </div>
+
+  <!-- PROFIL -->
+  <div id="tab-profil" class="tab-content" style="display:none;flex-direction:column">
+    <div style="background:#fff;padding:16px;border-bottom:1px solid #E2E8F0"><h2 style="font-size:22px;font-weight:700">Mon Profil</h2></div>
+    <div style="padding:16px">
+      <div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(15,82,186,.15);display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:32px;color:#0F52BA">person</span></div>
+        <div><h3 style="font-size:18px;font-weight:700">Mamadou Diallo</h3><p style="font-size:13px;color:#64748B">+221 77 123 45 67</p></div>
+      </div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Commandes récentes</h3>
+      <div id="profile-orders"></div>
+      <button class="btn" style="background:#1E3A8A;color:#fff;margin-top:20px;gap:8px" onclick="showScreen('dashboard-login')"><span class="material-symbols-outlined">admin_panel_settings</span>Basculer vers le Dashboard Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div id="product-detail" class="screen" style="background:#F8FAFC">
+  <div id="detail-content" style="flex:1;overflow-y:auto"></div>
+  <div id="detail-bottom" style="background:#fff;padding:12px 16px;display:none;gap:12px;box-shadow:0 -2px 8px rgba(0,0,0,.08)">
+    <button class="btn btn-outline" style="flex:1" onclick="addToCart()">Ajouter au panier</button>
+    <button class="btn btn-primary" style="flex:1" onclick="addToCart();showScreen('checkout')">Acheter maintenant</button>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div id="search-screen" class="screen" style="background:#F8FAFC">
+  <div style="background:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E2E8F0">
+    <button onclick="showScreen('main-app');switchTab('home')" style="background:none;border:none;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+    <input id="search-input" class="input" style="height:44px" placeholder="Rechercher un produit..." oninput="filterProducts()">
+  </div>
+  <div id="search-results" class="product-grid" style="padding:16px"></div>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkout" class="screen" style="background:#F8FAFC">
+  <div style="background:#fff;padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0">
+    <button onclick="showScreen('main-app');switchTab('panier')" style="background:none;border:none;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+    <h2 style="font-size:20px;font-weight:700">Validation de commande</h2>
+  </div>
+  <div style="padding:16px;flex:1;overflow-y:auto">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Adresse de livraison</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <input class="input" placeholder="Nom complet" value="Mamadou Diallo">
+      <input class="input" placeholder="Téléphone" value="+221 77 888 99 00">
+      <input class="input" placeholder="Adresse" value="Almadies Route de Ngor">
+      <input class="input" placeholder="Ville" value="Dakar">
+    </div>
+  </div>
+  <div style="background:#fff;padding:16px;box-shadow:0 -2px 8px rgba(0,0,0,.08)">
+    <button class="btn btn-primary" onclick="showScreen('payment')">Procéder au paiement</button>
+  </div>
+</div>
+
+<!-- PAYMENT -->
+<div id="payment" class="screen" style="background:#F8FAFC">
+  <div style="background:#fff;padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0">
+    <button onclick="showScreen('checkout')" style="background:none;border:none;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+    <h2 style="font-size:20px;font-weight:700">Paiement</h2>
+  </div>
+  <div style="padding:16px;flex:1;overflow-y:auto">
+    <div class="card" style="text-align:center;padding:24px;margin-bottom:20px">
+      <p style="color:#64748B;font-size:13px">Montant total à payer</p>
+      <p id="pay-amount" style="font-size:28px;font-weight:800;color:#0F52BA;margin-top:4px"></p>
+    </div>
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Choisissez votre mode de paiement</h3>
+    <div id="wave-option" onclick="selectPayment('wave')" class="card" style="border:2px solid #16A34A;background:rgba(22,163,74,.05);margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px">
+      <div style="width:20px;height:20px;border-radius:50%;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#16A34A"></div></div>
+      <span style="font-size:16px;font-weight:700">Wave</span>
+    </div>
+    <div id="om-option" onclick="selectPayment('om')" class="card" style="border:2px solid #E2E8F0;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px">
+      <div style="width:20px;height:20px;border-radius:50%;border:2px solid #E2E8F0"></div>
+      <span style="font-size:16px;font-weight:700">Orange Money</span>
+    </div>
+  </div>
+  <div style="background:#fff;padding:16px;box-shadow:0 -2px 8px rgba(0,0,0,.08)">
+    <button class="btn btn-primary" onclick="confirmOrder()">Payer maintenant</button>
+  </div>
+</div>
+
+<!-- ORDER CONFIRMATION -->
+<div id="confirmation" class="screen" style="background:#fff;justify-content:center;align-items:center;padding:24px;text-align:center">
+  <div style="width:90px;height:90px;border-radius:50%;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;margin-bottom:20px">
+    <span class="material-symbols-outlined" style="font-size:48px;color:#10B981">check</span>
+  </div>
+  <h2 style="font-size:24px;font-weight:700">Commande confirmée !</h2>
+  <p id="order-ref" style="color:#64748B;margin-top:8px"></p>
+  <button class="btn btn-primary" style="margin-top:32px" onclick="showScreen('main-app');switchTab('home')">Continuer mes achats</button>
+</div>
+
+<!-- DASHBOARD LOGIN -->
+<div id="dashboard-login" class="screen" style="background:#F8FAFC;justify-content:center;align-items:center;padding:24px">
+  <div class="card" style="width:100%;max-width:400px;padding:24px;text-align:center">
+    <div style="width:64px;height:64px;border-radius:16px;background:#0F52BA;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><span class="material-symbols-outlined" style="font-size:36px;color:#fff">admin_panel_settings</span></div>
+    <h2 style="font-size:20px;font-weight:700">JambarrTech Dashboard</h2>
+    <p style="font-size:13px;color:#64748B;margin-top:4px">Connexion Administrateur & Gérant</p>
+    <input class="input" style="margin-top:20px" placeholder="Email ou téléphone" value="admin@jambarrtech.com">
+    <input class="input" type="password" style="margin-top:12px" placeholder="Mot de passe" value="********">
+    <button class="btn btn-primary" style="margin-top:16px" onclick="showScreen('web-dashboard')">Se connecter</button>
+    <button onclick="showScreen('main-app');switchTab('home')" style="background:none;border:none;color:#0F52BA;font-size:13px;margin-top:16px;cursor:pointer">Retour à l'application mobile</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav" class="bottom-nav" style="display:none">
+  <button onclick="switchTab('home')" class="active" data-tab="home"><span class="material-symbols-outlined">home</span>Accueil</button>
+  <button onclick="switchTab('categories')" data-tab="categories"><span class="material-symbols-outlined">category</span>Catégories</button>
+  <button onclick="switchTab('panier')" data-tab="panier" style="position:relative"><span class="material-symbols-outlined">shopping_bag</span>Panier<span id="cart-badge" class="badge" style="display:none">0</span></button>
+  <button onclick="switchTab('favoris')" data-tab="favoris"><span class="material-symbols-outlined">favorite</span>Favoris</button>
+  <button onclick="switchTab('profil')" data-tab="profil"><span class="material-symbols-outlined">person</span>Profil</button>
+</div>
+
+<script>
+// STATE
+let currentTab = 'home';
+let cart = [];
+let favorites = [];
+let selectedPayment = 'wave';
+let onboardStep = 0;
+const onboardData = [
+  {icon:'storefront',title:"Découvrez l'Excellence",desc:"La marketplace premium au Sénégal regroupant les meilleures enseignes de mode, tech et beauté."},
+  {icon:'local_mall',title:"Produits & Boutiques Certifiés",desc:"Parcourez des milliers d'articles de mode, tech, maison et beauté, livrés directement chez vous à Dakar."},
+  {icon:'payment',title:"Paiement Wave & Orange Money",desc:"Payez en un clic via Wave ou Orange Money, sans carte bancaire, en toute sécurité."}
+];
+
+// CATEGORIES from Android
+const categories = [
+  {id:'1',name:'Mode',icon:'checkroom',count:45,image:'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=200&q=80'},
+  {id:'2',name:'Tech & Électronique',icon:'devices',count:82,image:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80'},
+  {id:'3',name:'Maison & Déco',icon:'home',count:34,image:'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=200&q=80'},
+  {id:'4',name:'Beauté & Soins',icon:'face',count:29,image:'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=200&q=80'},
+  {id:'5',name:'Sport & Fitness',icon:'fitness_center',count:51,image:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=200&q=80'},
+  {id:'6',name:'Informatique',icon:'laptop',count:67,image:'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=200&q=80'}
+];
+
+// PRODUCTS from Android
+const products = [
+  {id:'p1',name:'Casque Sans Fil ANC Pro',category:'Tech & Électronique',price:45000,promoPrice:55000,description:'Casque audio haut de gamme à réduction active de bruit, autonomie 40h, son spatial haute fidélité.',stock:18,reference:'JBT-TECH-01',image:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Tech Store',rating:4.9,reviewCount:214},
+  {id:'p2',name:'Sneakers Urbaines Premium',category:'Mode',price:32000,promoPrice:40000,description:'Chaussures de ville élégantes en cuir véritable, confort exceptionnel et design minimaliste.',stock:25,reference:'JBT-MODE-02',image:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Fashion',rating:4.7,reviewCount:98},
+  {id:'p3',name:'Montre Connectée Sport Smart',category:'Tech & Électronique',price:65000,promoPrice:75000,description:'Suivi santé complet, GPS intégré, étanche 5ATM, écran AMOLED ultra lumineux.',stock:12,reference:'JBT-TECH-03',image:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80',boutique:'Dakar Tech Store',rating:4.8,reviewCount:156},
+  {id:'p4',name:'Sac à Dos Cuir Minimaliste',category:'Mode',price:28000,promoPrice:null,description:'Sac à dos professionnel pour ordinateur portable 15 pouces, imperméable et design épuré.',stock:30,reference:'JBT-MODE-04',image:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80',boutique:'Maison Dakar',rating:4.6,reviewCount:82},
+  {id:'p5',name:'Lampe de Bureau LED Design',category:'Maison & Déco',price:18500,promoPrice:22000,description:'Lampe tactile avec chargeur sans fil intégré, température de couleur réglable.',stock:40,reference:'JBT-HOME-05',image:'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80',boutique:'Design Deco SN',rating:4.9,reviewCount:64},
+  {id:'p6',name:'Kit Sérum Visage Éclat Bio',category:'Beauté & Soins',price:15000,promoPrice:null,description:'Sérum à la vitamine C naturelle et acide hyaluronique pour un teint lumineux et hydraté.',stock:55,reference:'JBT-BEAUTY-06',image:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',boutique:'Cosmetics Dakar',rating:4.9,reviewCount:142}
+];
+
+const orders = [
+  {ref:'JBT-9821',total:79000,status:'En cours',date:'31/08/2026',payment:'Wave'},
+  {ref:'JBT-9820',total:65000,status:'Préparation',date:'31/08/2026',payment:'Orange Money'},
+  {ref:'JBT-9819',total:37000,status:'Terminée',date:'30/08/2026',payment:'Wave'}
+];
+
+// FUNCTIONS
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');el.style.animation='none';el.offsetHeight;el.style.animation=''}
+  document.getElementById('bottom-nav').style.display=id==='main-app'?'flex':'none';
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('[id^="tab-"]').forEach(t=>{t.style.display='none'});
+  const el=document.getElementById('tab-'+tab);
+  if(el){el.style.display='flex';el.style.animation='none';el.offsetHeight;el.style.animation='fadeIn .3s ease'}
+  document.querySelectorAll('.bottom-nav button').forEach(b=>{b.classList.remove('active');if(b.dataset.tab===tab)b.classList.add('active')});
+  if(tab==='favoris')renderFavorites();
+  if(tab==='panier')renderCart();
+}
+
+function showMainApp(){
+  showScreen('main-app');
+  document.getElementById('bottom-nav').style.display='flex';
+  renderHome();
+}
+
+function nextOnboard(){
+  onboardStep++;
+  if(onboardStep>=3){showScreen('auth');return}
+  const d=onboardData[onboardStep];
+  document.getElementById('onboard-icon').innerHTML=`<span class="material-symbols-outlined" style="font-size:90px;color:#0F52BA">${d.icon}</span>`;
+  document.getElementById('onboard-title').textContent=d.title;
+  document.getElementById('onboard-desc').textContent=d.desc;
+  document.getElementById('onboard-btn').textContent=onboardStep===2?'Commencer':'Continuer';
+  for(let i=0;i<3;i++){const dot=document.getElementById('dot'+i);dot.style.width=i===onboardStep?'24px':'8px';dot.style.background=i===onboardStep?'#0F52BA':'#E2E8F0'}
+}
+
+function renderHome(){
+  // Categories scroll
+  const cs=document.getElementById('categories-scroll');
+  cs.innerHTML=categories.map(c=>`<div onclick="filterByCategory('${c.name}')" style="text-align:center;cursor:pointer;min-width:76px"><div style="width:68px;height:68px;border-radius:50%;background:rgba(15,82,186,.1);overflow:hidden;margin:0 auto 6px"><img src="${c.image}" style="width:100%;height:100%;object-fit:cover"></div><p style="font-size:12px;font-weight:500;color:#0F172A">${c.name}</p></div>`).join('');
+  // Products scroll
+  const ps=document.getElementById('products-scroll');
+  ps.innerHTML=products.map(p=>productCard(p,true)).join('');
+  // All products
+  const ap=document.getElementById('all-products');
+  ap.innerHTML=products.map(p=>productCard(p,false)).join('');
+}
+
+function productCard(p,scroll){
+  const isFav=favorites.includes(p.id);
+  return`<div class="product-card" onclick="showProduct('${p.id}')" style="${scroll?'min-width:165px;width:165px':'width:100%'}">
+    <div style="position:relative;height:140px"><img src="${p.image}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="event.stopPropagation();toggleFav('${p.id}')" style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined ${isFav?'filled':''}" style="font-size:18px;color:${isFav?'#EF4444':'#9CA3AF'}">favorite</span></button>
+    </div>
+    <div style="padding:12px"><p style="font-size:14px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</p>
+      <p style="font-size:14px;font-weight:800;color:#0F52BA;margin-top:4px">${p.price.toLocaleString()} FCFA</p>
+      ${p.promoPrice?`<p style="font-size:11px;color:#94A3B8;text-decoration:line-through">${p.promoPrice.toLocaleString()} FCFA</p>`:''}
+    </div></div>`;
+}
+
+function showProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  const isFav=favorites.includes(p.id);
+  document.getElementById('detail-content').innerHTML=`
+    <div style="position:relative;height:300px"><img src="${p.image}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="showScreen('main-app');switchTab('home')" style="position:absolute;top:12px;left:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined">arrow_back</span></button>
+      <button onclick="toggleFav('${p.id}');showProduct('${p.id}')" style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined ${isFav?'filled':''}" style="color:${isFav?'#EF4444':'#9CA3AF'}">favorite</span></button>
+    </div>
+    <div style="padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700;color:#0F52BA">${p.category}</span>
+        <div style="display:flex;align-items:center;gap:4px"><span class="material-symbols-outlined" style="font-size:16px;color:#F59E0B">star</span><span style="font-size:13px;color:#64748B">${p.rating} (${p.reviewCount} avis)</span></div>
+      </div>
+      <h1 style="font-size:22px;font-weight:700;color:#0F172A">${p.name}</h1>
+      <p style="font-size:24px;font-weight:800;color:#0F52BA;margin-top:8px">${p.price.toLocaleString()} FCFA</p>
+      <div style="height:1px;background:#E2E8F0;margin:16px 0"></div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">Description</h3>
+      <p style="font-size:14px;color:#64748B;line-height:20px">${p.description}</p>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span class="material-symbols-outlined" style="font-size:18px;color:#10B981">check_circle</span><span style="font-size:13px;font-weight:600;color:#10B981">Stock disponible (${p.stock} unités)</span></div>
+    </div>`;
+  document.getElementById('detail-bottom').style.display='flex';
+  window._currentProduct=p;
+  showScreen('product-detail');
+}
+
+function filterByCategory(name){
+  switchTab('categories');
+  const list=document.getElementById('categories-list');
+  const filtered=products.filter(p=>p.category===name);
+  list.innerHTML=`<h3 style="font-size:20px;font-weight:700;margin-bottom:4px">${name}</h3><div class="product-grid" style="padding:0">${filtered.map(p=>productCard(p,false)).join('')}</div>`;
+}
+
+function renderFavorites(){
+  const el=document.getElementById('favorites-content');
+  if(!favorites.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;border-radius:50%;background:rgba(15,82,186,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><span class="material-symbols-outlined" style="font-size:40px;color:#0F52BA">favorite</span></div><h3 style="font-size:20px;font-weight:700">Aucun favori</h3><p style="font-size:14px;color:#64748B;margin-top:8px">Vous n'avez pas encore ajouté de produits à vos favoris.</p></div>`;return}
+  const favProducts=products.filter(p=>favorites.includes(p.id));
+  el.innerHTML=`<div class="product-grid">${favProducts.map(p=>productCard(p,false)).join('')}</div>`;
+}
+
+function toggleFav(id){
+  const idx=favorites.indexOf(id);
+  if(idx>-1)favorites.splice(idx,1);else favorites.push(id);
+}
+
+function addToCart(){
+  const p=window._currentProduct;if(!p)return;
+  const existing=cart.find(c=>c.product.id===p.id);
+  if(existing)existing.quantity++;else cart.push({product:p,quantity:1});
+  updateCartBadge();
+}
+
+function updateCartBadge(){
+  const count=cart.reduce((s,c)=>s+c.quantity,0);
+  ['cart-badge','cart-badge-top'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=count;el.style.display=count>0?'flex':'none';el.classList.remove('badge-anim');void el.offsetWidth;el.classList.add('badge-anim')}
+  });
+}
+
+function renderCart(){
+  const el=document.getElementById('cart-items');
+  const summary=document.getElementById('cart-summary');
+  if(!cart.length){el.innerHTML=`<div style="text-align:center;padding:60px 20px"><span class="material-symbols-outlined" style="font-size:48px;color:#94A3B8">shopping_bag</span><h3 style="font-size:18px;font-weight:700;margin-top:12px">Votre panier est vide</h3></div>`;summary.style.display='none';return}
+  el.innerHTML=cart.map((c,i)=>`<div class="card" style="display:flex;gap:12px;margin-bottom:12px">
+    <img src="${c.product.image}" style="width:70px;height:70px;border-radius:8px;object-fit:cover">
+    <div style="flex:1"><p style="font-size:14px;font-weight:700">${c.product.name}</p><p style="font-size:13px;font-weight:700;color:#0F52BA;margin-top:4px">${c.product.price.toLocaleString()} FCFA</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <button onclick="changeQty(${i},-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid #E2E8F0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:16px">remove</span></button>
+        <span style="font-weight:700;min-width:20px;text-align:center">${c.quantity}</span>
+        <button onclick="changeQty(${i},1)" style="width:28px;height:28px;border-radius:50%;border:1px solid #E2E8F0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:16px">add</span></button>
+      </div>
+    </div></div>`).join('');
+  const sub=cart.reduce((s,c)=>s+c.product.price*c.quantity,0);
+  document.getElementById('subtotal').textContent=sub.toLocaleString()+' FCFA';
+  document.getElementById('total').textContent=(sub+2000).toLocaleString()+' FCFA';
+  summary.style.display='block';
+}
+
+function changeQty(i,d){
+  cart[i].quantity+=d;
+  if(cart[i].quantity<=0)cart.splice(i,1);
+  updateCartBadge();renderCart();
+}
+
+function selectPayment(method){
+  selectedPayment=method;
+  document.getElementById('wave-option').style.borderColor=method==='wave'?'#16A34A':'#E2E8F0';
+  document.getElementById('wave-option').style.background=method==='wave'?'rgba(22,163,74,.05)':'transparent';
+  document.getElementById('wave-option').querySelector('div').innerHTML=method==='wave'?'<div style="width:10px;height:10px;border-radius:50%;background:#16A34A"></div>':'';
+  document.getElementById('om-option').style.borderColor=method==='om'?'#EA580C':'#E2E8F0';
+  document.getElementById('om-option').style.background=method==='om'?'rgba(234,88,12,.05)':'transparent';
+  document.getElementById('om-option').querySelector('div').innerHTML=method==='om'?'<div style="width:10px;height:10px;border-radius:50%;background:#EA580C"></div>':'';
+}
+
+function confirmOrder(){
+  const ref='JBT-'+Math.floor(1000+Math.random()*9000);
+  document.getElementById('order-ref').textContent='Référence : #'+ref;
+  cart=[];updateCartBadge();
+  showScreen('confirmation');
+}
+
+function filterProducts(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const filtered=products.filter(p=>p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q));
+  document.getElementById('search-results').innerHTML=filtered.map(p=>productCard(p,false)).join('');
+}
+
+// INIT
+setTimeout(()=>{showScreen('onboarding')},1800);
+</script>
 </body>
 </html>
