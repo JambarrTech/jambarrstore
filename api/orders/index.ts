@@ -1,18 +1,4 @@
-import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'jambarr-jwt-secret-2024';
-
-function requireAdmin(req: any): boolean {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) return false;
-  try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as { role: string };
-    return payload.role === 'admin';
-  } catch {
-    return false;
-  }
-}
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
