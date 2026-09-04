@@ -18,15 +18,17 @@
     "db:seed": "npx prisma db seed",
     "db:studio": "npx prisma studio",
     "db:generate": "npx prisma generate",
-    "db:push": "npx prisma db push",
-    "vercel-build:client": "cd services/client && npm install && npm run build",
-    "vercel-build:admin": "cd services/admin && npm install && npm run build"
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^5.22.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
     "concurrently": "^8.2.2",
     "tsx": "^4.23.13"
   },

@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getToken(): string | null {
   try {
@@ -141,7 +141,7 @@ export const api = {
     delete: (id: string) =>
       request<{ success: boolean }>(`/api/products/${id}`, { method: 'DELETE' }),
     toggle: (id: string) =>
-      request<ProductApi>(`/api/products/${id}/toggle`, { method: 'PATCH' }),
+      request<ProductApi>(`/api/products/${id}`, { method: 'PATCH' }),
   },
 
   orders: {
@@ -151,7 +151,7 @@ export const api = {
     },
     get: (id: string) => request<OrderApi>(`/api/orders/${id}`),
     setStatus: (id: string, status: string) =>
-      request<OrderApi>(`/api/orders/${id}/status`, {
+      request<OrderApi>(`/api/orders/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }),
@@ -164,7 +164,7 @@ export const api = {
     payment: string;
     lines: { productId: string; quantity: number }[];
   }) =>
-    request<OrderApi>('/api/checkout', {
+    request<OrderApi>('/api/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
