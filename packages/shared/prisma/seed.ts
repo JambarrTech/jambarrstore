@@ -1,4 +1,5 @@
 import { PrismaClient, CategoryId, OrderStatus, PaymentMethod } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -362,6 +363,33 @@ async function main() {
       },
     });
   }
+
+  // Create users
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const clientPassword = await bcrypt.hash('client123', 10);
+
+  await prisma.user.upsert({
+    where: { email: 'admin@jambarrstore.com' },
+    update: {},
+    create: {
+      email: 'admin@jambarrstore.com',
+      name: 'Jambarr Admin',
+      password: adminPassword,
+      role: 'admin',
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'client@jambarrstore.com' },
+    update: {},
+    create: {
+      email: 'client@jambarrstore.com',
+      name: 'Aminata Diallo',
+      password: clientPassword,
+      role: 'client',
+      phone: '+221 77 412 08 55',
+    },
+  });
 
   console.log('Database seeded successfully!');
 }

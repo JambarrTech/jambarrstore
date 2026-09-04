@@ -1,13 +1,14 @@
 import React from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   BellIcon,
   LayoutDashboardIcon,
+  LogOutIcon,
   PackageIcon,
   ShoppingCartIcon,
   UsersIcon
 } from 'lucide-react';
-import { useStore } from '@jambarrtech/shared';
+import { useStore, useAuth } from '@jambarrtech/shared';
 
 const nav = [
   { to: '/', label: 'Tableau de bord', icon: LayoutDashboardIcon, end: true },
@@ -25,8 +26,19 @@ const titles: Record<string, string> = {
 
 export function AdminLayout() {
   const { orders } = useStore();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const pending = orders.filter((o) => o.status === 'en_attente').length;
+
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'AD';
 
   return (
     <div className="flex min-h-full w-full bg-sand">
@@ -65,6 +77,26 @@ export function AdminLayout() {
             ))}
           </ul>
         </nav>
+
+        <div className="border-t border-line pt-3">
+          <div className="flex items-center gap-2 px-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft text-[11px] font-bold text-brand-dark">
+              {initials}
+            </span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-xs font-semibold text-ink">{user?.name || 'Admin'}</p>
+              <p className="truncate text-[11px] text-ink-muted">{user?.email}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-berry transition-colors hover:bg-rose-50"
+          >
+            <LogOutIcon className="h-3.5 w-3.5" />
+            Déconnexion
+          </button>
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -90,6 +122,14 @@ export function AdminLayout() {
                 <item.icon className="h-4 w-4" aria-hidden />
               </NavLink>
             ))}
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Déconnexion"
+              className="rounded-lg p-2 text-ink-muted hover:text-berry"
+            >
+              <LogOutIcon className="h-4 w-4" aria-hidden />
+            </button>
           </nav>
           <div className="ml-auto hidden items-center gap-3 lg:flex">
             <button
@@ -104,12 +144,20 @@ export function AdminLayout() {
             </button>
             <div className="flex items-center gap-2 border-l border-line pl-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white">
-                JS
+                {initials}
               </span>
               <div className="leading-tight">
-                <p className="text-xs font-semibold text-ink">Jambarr Officiel</p>
-                <p className="text-[11px] text-ink-muted">Administrateur</p>
+                <p className="text-xs font-semibold text-ink">{user?.name || 'Admin'}</p>
+                <p className="text-[11px] text-ink-muted">{user?.role === 'admin' ? 'Administrateur' : 'Vendeur'}</p>
               </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="ml-2 rounded-lg p-1.5 text-ink-muted hover:bg-rose-50 hover:text-berry"
+                aria-label="Déconnexion"
+              >
+                <LogOutIcon className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </header>

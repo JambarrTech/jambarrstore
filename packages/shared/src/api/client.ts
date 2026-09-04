@@ -1,15 +1,39 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+function getToken(): string | null {
+  try {
+    return localStorage.getItem('jambarr_token');
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string> || {}),
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'Erreur API');
   }
   return res.json();
+}
+
+export interface UserApi {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  phone?: string;
+  createdAt: string;
 }
 
 export type CategoryApi = { id: string; label: string; emoji?: string };
@@ -77,6 +101,24 @@ export interface SalesDayApi {
 }
 
 export const api = {
+  auth: {
+    login: (data: { email: string; password: string }) =>
+      request<{ token: string; user: UserApi }>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    register: (data: { name: string; email: string; password: string; phone?: string }) =>
+      request<{ token: string; user: UserApi }>('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    me: (token?: string) => {
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return request<UserApi>('/api/auth/me', { headers });
+    },
+  },
+
   categories: {
     list: () => request<CategoryApi[]>('/api/categories'),
   },
