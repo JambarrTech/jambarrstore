@@ -2,6 +2,8 @@ const cors = require('./lib/cors');
 const prisma = require('./lib/prisma');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { validate, registerSchema, loginSchema, productSchema, orderSchema, reviewSchema, promotionSchema, settingsSchema } = require('./lib/validations');
+const { authMiddleware, requireAuth, requireAdmin, requireManagerOrAdmin, logActivity } = require('./lib/middleware');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -21,17 +23,6 @@ function checkRateLimit(ip, maxRequests = 60, windowMs = 60000) {
 
 function getClientIp(req) {
   return req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
-}
-
-function authMiddleware(req) {
-  const header = req.headers.authorization;
-  if (!header) return null;
-  const token = header.split(' ')[1];
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch {
-    return null;
-  }
 }
 
 function parsePath(url) {
@@ -62,10 +53,11 @@ const handler = async (req, res) => {
 
     // ==================== AUTH ====================
     if (path === '/auth/register' && method === 'POST') {
-      const { name, email, phone, password, role } = req.body;
-      if (!name || !email || !phone || !password) {
-        return json(res, 400, { error: 'Champs requis: name, email, phone, password' });
+      const validation = validate(registerSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
       }
+      const { name, email, phone, password, role } = validation.data;
       const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone }] } });
       if (existing) return json(res, 409, { error: 'Email ou téléphone déjà utilisé' });
       const hash = await bcrypt.hash(password, 10);
@@ -78,8 +70,11 @@ const handler = async (req, res) => {
     }
 
     if (path === '/auth/login' && method === 'POST') {
-      const { email, password } = req.body;
-      if (!email || !password) return json(res, 400, { error: 'Email et password requis' });
+      const validation = validate(loginSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
+      }
+      const { email, password } = validation.data;
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) return json(res, 401, { error: 'Identifiants incorrects' });
       const valid = await bcrypt.compare(password, user.password);
@@ -90,8 +85,12 @@ const handler = async (req, res) => {
     }
 
     if (path === '/auth/me' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Token manquant ou invalide' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Token manquant ou invalide' });
+      }
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
         select: { id: true, name: true, email: true, phone: true, role: true, createdAt: true }
@@ -102,8 +101,12 @@ const handler = async (req, res) => {
 
     // ==================== USERS ====================
     if (path === '/users' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const users = await prisma.user.findMany({
         select: { id: true, name: true, email: true, phone: true, role: true, createdAt: true }
       });
@@ -111,8 +114,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/users\/[^/]+\/role$/) && method === 'PATCH') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const userId = path.split('/')[2];
       const { role } = req.body;
       if (!['CLIENT', 'ADMIN', 'MANAGER'].includes(role)) return json(res, 400, { error: 'Rôle invalide' });
@@ -134,8 +141,12 @@ const handler = async (req, res) => {
     }
 
     if (path === '/categories' && method === 'POST') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const { name, icon } = req.body;
       if (!name) return json(res, 400, { error: 'Nom requis' });
       const category = await prisma.category.create({ data: { name, icon } });
@@ -144,8 +155,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/categories\/[^/]+$/) && method === 'PUT') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const catId = path.split('/')[2];
       const { name, icon } = req.body;
       const category = await prisma.category.update({
@@ -156,8 +171,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/categories\/[^/]+$/) && method === 'DELETE') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const catId = path.split('/')[2];
       await prisma.category.delete({ where: { id: catId } });
       return json(res, 200, { success: true });
@@ -195,12 +214,17 @@ const handler = async (req, res) => {
     }
 
     if (path === '/products' && method === 'POST') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
-      const { name, reference, price, oldPrice, stock, imageUrl, categoryId, isFeatured, isFlash, description } = req.body;
-      if (!name || !reference || !price || !categoryId) {
-        return json(res, 400, { error: 'Champs requis: name, reference, price, categoryId' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
       }
+      const validation = validate(productSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
+      }
+      const { name, reference, price, oldPrice, stock, imageUrl, categoryId, isFeatured, isFlash, description } = validation.data;
       const product = await prisma.product.create({
         data: { name, reference, price, oldPrice, stock: stock || 0, imageUrl: imageUrl || '', categoryId, isFeatured: isFeatured || false, isFlash: isFlash || false, description }
       });
@@ -241,8 +265,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/products\/[^/]+$/) && method === 'PUT') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const productId = path.split('/')[2];
       const { name, reference, price, oldPrice, stock, imageUrl, categoryId, isFeatured, isFlash, description } = req.body;
       const product = await prisma.product.update({
@@ -265,8 +293,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/products\/[^/]+$/) && method === 'DELETE') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const productId = path.split('/')[2];
       const product = await prisma.product.delete({ where: { id: productId } });
       await logActivity(`Suppression produit: ${product.name}`, user.email, 'Produits');
@@ -275,8 +307,12 @@ const handler = async (req, res) => {
 
     // ==================== ORDERS ====================
     if (path === '/orders' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Authentification requise' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Authentification requise' });
+      }
       const { status } = Object.fromEntries(url.searchParams);
       const where = {};
       if (status) where.status = status;
@@ -289,10 +325,11 @@ const handler = async (req, res) => {
     }
 
     if (path === '/orders' && method === 'POST') {
-      const { clientName, clientPhone, clientAddress, items, paymentMethod } = req.body;
-      if (!clientName || !clientPhone || !items || !items.length || !paymentMethod) {
-        return json(res, 400, { error: 'Champs requis: clientName, clientPhone, items, paymentMethod' });
+      const validation = validate(orderSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
       }
+      const { clientName, clientPhone, clientAddress, items, paymentMethod } = validation.data;
 
       let totalAmount = 0;
       const orderItems = [];
@@ -343,8 +380,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/orders\/[^/]+$/) && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Authentification requise' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Authentification requise' });
+      }
       const orderId = path.split('/')[2];
       const order = await prisma.order.findUnique({
         where: { id: orderId },
@@ -355,8 +396,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/orders\/[^/]+\/status$/) && method === 'PATCH') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const orderId = path.split('/')[2];
       const { status } = req.body;
       const validStatuses = ['PENDING', 'PROCESSING', 'DELIVERED', 'CANCELLED'];
@@ -371,8 +416,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/orders\/[^/]+$/) && method === 'DELETE') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const orderId = path.split('/')[2];
       const order = await prisma.order.delete({ where: { id: orderId } });
       await logActivity(`Suppression commande ${order.reference}`, user.email, 'Commandes');
@@ -381,8 +430,12 @@ const handler = async (req, res) => {
 
     // ==================== PAYMENTS ====================
     if (path === '/payments' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Authentification requise' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Authentification requise' });
+      }
       const { method: payMethod } = Object.fromEntries(url.searchParams);
       const where = {};
       if (payMethod) where.method = payMethod;
@@ -408,9 +461,11 @@ const handler = async (req, res) => {
     }
 
     if (path === '/reviews' && method === 'POST') {
-      const { productId, clientName, rating, comment } = req.body;
-      if (!clientName || !comment) return json(res, 400, { error: 'Champs requis: clientName, comment' });
-      if (rating && (rating < 1 || rating > 5)) return json(res, 400, { error: 'Rating doit être entre 1 et 5' });
+      const validation = validate(reviewSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
+      }
+      const { productId, clientName, rating, comment } = validation.data;
       let product = null;
       if (productId) {
         product = await prisma.product.findUnique({ where: { id: productId } });
@@ -429,8 +484,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/reviews\/[^/]+\/approve$/) && method === 'PATCH') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const reviewId = path.split('/')[2];
       const review = await prisma.review.update({ where: { id: reviewId }, data: { status: 'approved' } });
       await logActivity(`Approbation avis (${review.clientName})`, user.email, 'Avis');
@@ -438,16 +497,24 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/reviews\/[^/]+\/reject$/) && method === 'PATCH') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const reviewId = path.split('/')[2];
       const review = await prisma.review.update({ where: { id: reviewId }, data: { status: 'rejected' } });
       return json(res, 200, review);
     }
 
     if (path.match(/^\/reviews\/[^/]+$/) && method === 'DELETE') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const reviewId = path.split('/')[2];
       const review = await prisma.review.delete({ where: { id: reviewId } });
       await logActivity(`Suppression avis (${review.clientName})`, user.email, 'Avis');
@@ -461,12 +528,17 @@ const handler = async (req, res) => {
     }
 
     if (path === '/promotions' && method === 'POST') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
-      const { title, discountPercent, targetCategory, startDate, endDate } = req.body;
-      if (!title || !discountPercent || !targetCategory) {
-        return json(res, 400, { error: 'Champs requis: title, discountPercent, targetCategory' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
       }
+      const validation = validate(promotionSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
+      }
+      const { title, discountPercent, targetCategory, startDate, endDate } = validation.data;
       const promo = await prisma.promotion.create({
         data: { title, discountPercent, targetCategory, startDate, endDate }
       });
@@ -475,8 +547,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/promotions\/[^/]+$/) && method === 'PUT') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const promoId = path.split('/')[2];
       const { title, discountPercent, targetCategory, startDate, endDate, isActive } = req.body;
       const promo = await prisma.promotion.update({
@@ -494,8 +570,12 @@ const handler = async (req, res) => {
     }
 
     if (path.match(/^\/promotions\/[^/]+$/) && method === 'DELETE') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const promoId = path.split('/')[2];
       await prisma.promotion.delete({ where: { id: promoId } });
       return json(res, 200, { success: true });
@@ -503,8 +583,12 @@ const handler = async (req, res) => {
 
     // ==================== CUSTOMERS ====================
     if (path === '/customers' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user || !['ADMIN', 'MANAGER'].includes(user.role)) return json(res, 403, { error: 'Accès refusé' });
+      let user;
+      try {
+        user = requireManagerOrAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès refusé' });
+      }
       const customers = await prisma.user.findMany({ where: { role: 'CLIENT' }, include: { orders: true } });
       const result = customers.map(c => ({
         id: c.id, name: c.name, phone: c.phone, email: c.email,
@@ -516,8 +600,12 @@ const handler = async (req, res) => {
 
     // ==================== MANAGERS ====================
     if (path === '/managers' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
       const managers = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'MANAGER'] } } });
       const result = managers.map(m => ({
         id: m.id, name: m.name, email: m.email,
@@ -528,8 +616,12 @@ const handler = async (req, res) => {
 
     // ==================== STATS ====================
     if (path === '/stats' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Authentification requise' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Authentification requise' });
+      }
 
       const [ordersCount, customersCount, productsCount, revenueResult, paymentsCount] = await Promise.all([
         prisma.order.count(),
@@ -567,8 +659,12 @@ const handler = async (req, res) => {
 
     // ==================== ACTIVITY LOGS ====================
     if (path === '/activity-logs' && method === 'GET') {
-      const user = authMiddleware(req);
-      if (!user) return json(res, 401, { error: 'Authentification requise' });
+      let user;
+      try {
+        user = requireAuth(req);
+      } catch {
+        return json(res, 401, { error: 'Authentification requise' });
+      }
       const { module: mod } = Object.fromEntries(url.searchParams);
       const where = {};
       if (mod) where.module = mod;
@@ -590,22 +686,31 @@ const handler = async (req, res) => {
     }
 
     if (path === '/settings' && method === 'PUT') {
-      const user = authMiddleware(req);
-      if (!user || user.role !== 'ADMIN') return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      let user;
+      try {
+        user = requireAdmin(req);
+      } catch {
+        return json(res, 403, { error: 'Accès réservé aux administrateurs' });
+      }
+      const validation = validate(settingsSchema, req.body);
+      if (!validation.valid) {
+        return json(res, 400, { error: 'Données invalides', details: validation.errors });
+      }
+      const data = validation.data;
       let settings = await prisma.settings.findFirst();
       if (!settings) {
-        settings = await prisma.settings.create({ data: req.body });
+        settings = await prisma.settings.create({ data });
       } else {
         settings = await prisma.settings.update({
           where: { id: settings.id },
           data: {
-            ...(req.body.storeName && { storeName: req.body.storeName }),
-            ...(req.body.storeEmail && { storeEmail: req.body.storeEmail }),
-            ...(req.body.phone && { phone: req.body.phone }),
-            ...(req.body.address && { address: req.body.address }),
-            ...(req.body.logoUrl !== undefined && { logoUrl: req.body.logoUrl }),
-            ...(req.body.commissionRate !== undefined && { commissionRate: req.body.commissionRate }),
-            ...(req.body.minCommission !== undefined && { minCommission: req.body.minCommission }),
+            ...(data.storeName && { storeName: data.storeName }),
+            ...(data.storeEmail && { storeEmail: data.storeEmail }),
+            ...(data.phone && { phone: data.phone }),
+            ...(data.address && { address: data.address }),
+            ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
+            ...(data.commissionRate !== undefined && { commissionRate: data.commissionRate }),
+            ...(data.minCommission !== undefined && { minCommission: data.minCommission }),
           }
         });
       }
@@ -619,15 +724,5 @@ const handler = async (req, res) => {
     return json(res, 500, { error: 'Erreur serveur', detail: error.message });
   }
 };
-
-async function logActivity(action, user, module) {
-  try {
-    await prisma.activityLog.create({
-      data: { action, user, module, result: 'SUCCÈS' }
-    });
-  } catch (e) {
-    console.error('Activity log error:', e.message);
-  }
-}
 
 module.exports = cors(handler);

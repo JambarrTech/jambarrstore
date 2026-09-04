@@ -4,6 +4,7 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
+const { validate, registerSchema, loginSchema, productSchema, orderSchema, reviewSchema, promotionSchema, settingsSchema } = require('./lib/validations');
 require('dotenv').config();
 
 const prisma = new PrismaClient();
@@ -59,10 +60,11 @@ app.get('/api/health', async (req, res) => {
 // ==================== AUTH ====================
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, email, phone, password, role } = req.body;
-    if (!name || !email || !phone || !password) {
-      return res.status(400).json({ error: 'Champs requis: name, email, phone, password' });
+    const validation = validate(registerSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
     }
+    const { name, email, phone, password, role } = validation.data;
     const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone }] } });
     if (existing) return res.status(409).json({ error: 'Email ou téléphone déjà utilisé' });
     const hash = await bcrypt.hash(password, 10);
@@ -79,8 +81,11 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email et password requis' });
+    const validation = validate(loginSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
+    }
+    const { email, password } = validation.data;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Identifiants incorrects' });
     const valid = await bcrypt.compare(password, user.password);
@@ -257,10 +262,11 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.post('/api/products', authMiddleware, managerOrAdmin, async (req, res) => {
   try {
-    const { name, reference, price, oldPrice, stock, imageUrl, categoryId, isFeatured, isFlash, description } = req.body;
-    if (!name || !reference || !price || !categoryId) {
-      return res.status(400).json({ error: 'Champs requis: name, reference, price, categoryId' });
+    const validation = validate(productSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
     }
+    const { name, reference, price, oldPrice, stock, imageUrl, categoryId, isFeatured, isFlash, description } = validation.data;
     const product = await prisma.product.create({
       data: { name, reference, price, oldPrice, stock: stock || 0, imageUrl: imageUrl || '', categoryId, isFeatured: isFeatured || false, isFlash: isFlash || false, description }
     });
@@ -339,10 +345,11 @@ app.get('/api/orders/:id', authMiddleware, async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { clientName, clientPhone, clientAddress, items, paymentMethod } = req.body;
-    if (!clientName || !clientPhone || !items || !items.length || !paymentMethod) {
-      return res.status(400).json({ error: 'Champs requis: clientName, clientPhone, items, paymentMethod' });
+    const validation = validate(orderSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
     }
+    const { clientName, clientPhone, clientAddress, items, paymentMethod } = validation.data;
 
     // Calculate total
     let totalAmount = 0;
@@ -461,9 +468,11 @@ app.get('/api/reviews', async (req, res) => {
 
 app.post('/api/reviews', async (req, res) => {
   try {
-    const { productId, clientName, rating, comment } = req.body;
-    if (!clientName || !comment) return res.status(400).json({ error: 'Champs requis: clientName, comment' });
-    if (rating && (rating < 1 || rating > 5)) return res.status(400).json({ error: 'Rating doit être entre 1 et 5' });
+    const validation = validate(reviewSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
+    }
+    const { productId, clientName, rating, comment } = validation.data;
     if (productId) {
       const product = await prisma.product.findUnique({ where: { id: productId } });
       if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
@@ -530,10 +539,11 @@ app.get('/api/promotions', async (req, res) => {
 
 app.post('/api/promotions', authMiddleware, managerOrAdmin, async (req, res) => {
   try {
-    const { title, discountPercent, targetCategory, startDate, endDate } = req.body;
-    if (!title || !discountPercent || !targetCategory) {
-      return res.status(400).json({ error: 'Champs requis: title, discountPercent, targetCategory' });
+    const validation = validate(promotionSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
     }
+    const { title, discountPercent, targetCategory, startDate, endDate } = validation.data;
     const promo = await prisma.promotion.create({
       data: { title, discountPercent, targetCategory, startDate, endDate }
     });
@@ -674,22 +684,28 @@ app.get('/api/settings', async (req, res) => {
 
 app.put('/api/settings', authMiddleware, adminOnly, async (req, res) => {
   try {
+    const validation = validate(settingsSchema, req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Données invalides', details: validation.errors });
+    }
+    const data = validation.data;
     let settings = await prisma.settings.findFirst();
     if (!settings) {
-      settings = await prisma.settings.create({ data: {} });
+      settings = await prisma.settings.create({ data });
+    } else {
+      settings = await prisma.settings.update({
+        where: { id: settings.id },
+        data: {
+          ...(data.storeName && { storeName: data.storeName }),
+          ...(data.storeEmail && { storeEmail: data.storeEmail }),
+          ...(data.phone && { phone: data.phone }),
+          ...(data.address && { address: data.address }),
+          ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
+          ...(data.commissionRate !== undefined && { commissionRate: data.commissionRate }),
+          ...(data.minCommission !== undefined && { minCommission: data.minCommission }),
+        }
+      });
     }
-    settings = await prisma.settings.update({
-      where: { id: settings.id },
-      data: {
-        ...(req.body.storeName && { storeName: req.body.storeName }),
-        ...(req.body.storeEmail && { storeEmail: req.body.storeEmail }),
-        ...(req.body.phone && { phone: req.body.phone }),
-        ...(req.body.address && { address: req.body.address }),
-        ...(req.body.logoUrl !== undefined && { logoUrl: req.body.logoUrl }),
-        ...(req.body.commissionRate !== undefined && { commissionRate: req.body.commissionRate }),
-        ...(req.body.minCommission !== undefined && { minCommission: req.body.minCommission }),
-      }
-    });
     await logActivity('Mise à jour paramètres', req.user.email, 'Paramètres');
     res.json(settings);
   } catch (e) {
@@ -698,15 +714,7 @@ app.put('/api/settings', authMiddleware, adminOnly, async (req, res) => {
 });
 
 // ==================== HELPERS ====================
-async function logActivity(action, user, module) {
-  try {
-    await prisma.activityLog.create({
-      data: { action, user, module, result: 'SUCCÈS' }
-    });
-  } catch (e) {
-    console.error('Activity log error:', e.message);
-  }
-}
+const { logActivity } = require('./lib/middleware');
 
 // ==================== START ====================
 app.listen(PORT, () => {
