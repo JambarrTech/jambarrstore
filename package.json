@@ -1,30 +1,35 @@
 {
   "name": "jambarrtech",
-  "version": "1.0.0",
-  "description": "JambarrTech - E-commerce Sénégal",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
-    "seed": "node prisma/seed.js",
-    "db:push": "npx prisma db push",
-    "test": "jest --passWithNoTests"
-  },
-  "prisma": {
-    "schema": "./prisma/schema.prisma"
+    "dev:client": "npm run dev --workspace=services/client",
+    "dev:admin": "npm run dev --workspace=services/admin",
+    "dev:api": "npm run dev --workspace=services/api",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "build:client": "npm run build --workspace=services/client",
+    "build:admin": "npm run build --workspace=services/admin",
+    "build": "npm run build:client && npm run build:admin",
+    "db:migrate": "npx prisma migrate dev",
+    "db:seed": "npx prisma db seed",
+    "db:studio": "npx prisma studio",
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3",
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "zod": "^4.5.4"
-  },
-  "engines": {
-    "node": ">=18"
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
   },
   "devDependencies": {
-    "jest": "^30.5.1",
-    "prisma": "^6.9.0",
-    "supertest": "^7.2.2"
+    "concurrently": "^8.2.2",
+    "tsx": "^4.23.13"
+  },
+  "prisma": {
+    "schema": "packages/shared/prisma/schema.prisma",
+    "seed": "npx tsx packages/shared/prisma/seed.ts"
   }
 }

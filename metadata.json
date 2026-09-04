@@ -1,8 +1,0 @@
-{
-  "name": "JambarrTech",
-  "description": "JambarrTech Mobile Client & Admin/Manager Dashboard E-commerce Ecosystem",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CategoryId {
+  electronique
+  mode
+  maison
+  beaute
+  epicerie
+}
+
+enum OrderStatus {
+  en_attente
+  confirmee
+  expediee
+  livree
+  annulee
+}
+
+enum PaymentMethod {
+  Wave
+  Orange_Money
+  Paiement_a_la_livraison
+}
+
+model Category {
+  id       CategoryId @id
+  label    String
+  emoji    String?
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  CategoryId
+  price       Int
+  oldPrice    Int?
+  image       String
+  stock       Int      @default(0)
+  rating      Float    @default(0)
+  reviews     Int      @default(0)
+  sold        Int      @default(0)
+  seller      String
+  description String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderLines OrderLine[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  city      String
+  orders    Int      @default(0)
+  spent     Int      @default(0)
+  since     DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ordersList Order[]
+}
+
+model Order {
+  id           String        @id @default(cuid())
+  customerId   String
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerName String
+  city         String
+  createdAt    DateTime      @default(now())
+  status       OrderStatus   @default(en_attente)
+  payment      PaymentMethod
+  total        Int           @default(0)
+  updatedAt    DateTime      @updatedAt
+
+  lines OrderLine[]
+}
+
+model OrderLine {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Int
+  quantity  Int
+  image     String
+}
