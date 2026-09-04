@@ -71,7 +71,7 @@ export function Cart() {
           Votre panier est vide
         </h2>
         <Link
-          to="/"
+          to="/dashboard"
           className="mt-4 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark"
         >
           Découvrir les produits
@@ -83,7 +83,7 @@ export function Cart() {
   return (
     <div className="min-h-screen bg-sand pb-32">
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
-        <Link to="/" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
+        <Link to="/dashboard" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-lg font-bold text-ink">Panier</h1>

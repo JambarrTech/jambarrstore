@@ -29,7 +29,7 @@ export function Login() {
   return (
     <div className="flex min-h-screen flex-col bg-sand">
       <header className="flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
-        <Link to="/" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
+        <Link to="/dashboard" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-lg font-bold text-ink">Connexion</h1>

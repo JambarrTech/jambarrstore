@@ -10,7 +10,7 @@ import {
 import { useStore } from '@jambarrtech/shared';
 
 const tabs = [
-  { to: '/', label: 'Accueil', icon: HomeIcon, end: true },
+  { to: '/dashboard', label: 'Accueil', icon: HomeIcon, end: true },
   { to: '/categories', label: 'Catégories', icon: LayoutGridIcon, end: false },
   { to: '/panier', label: 'Panier', icon: ShoppingBagIcon, end: false },
   { to: '/commandes', label: 'Commandes', icon: PackageIcon, end: false },

@@ -34,19 +34,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <StoreProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/splash" element={<Splash />} />
+            <Route path="/" element={<Splash />} />
             <Route path="/connexion" element={<Login />} />
             <Route path="/inscription" element={<Register />} />
             <Route path="/confirmation" element={<Confirmation />} />
-            <Route element={<MobileLayout />}>
-              <Route path="/" element={<Home />} />
+            <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Home />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/produit/:id" element={<ProductDetail />} />
               <Route path="/recherche" element={<SearchPage />} />
               <Route path="/vendeur/:id" element={<SellerProfile />} />
               <Route path="/aide" element={<Help />} />
-            </Route>
-            <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
               <Route path="/panier" element={<Cart />} />
               <Route path="/commandes" element={<Orders />} />
               <Route path="/commandes/:id" element={<OrderDetail />} />

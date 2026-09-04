@@ -66,7 +66,7 @@ export function ProductDetail() {
   return (
     <div className="min-h-screen bg-sand pb-24">
       <header className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
-        <Link to="/" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
+        <Link to="/dashboard" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
         <h1 className="font-display text-sm font-bold text-ink line-clamp-1">

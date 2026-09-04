@@ -40,7 +40,7 @@ export function Categories() {
     <div>
       <header className="sticky top-0 z-10 bg-white px-4 pb-3 pt-5 shadow-sm">
         <div className="flex items-center gap-3">
-          <Link to="/" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
+          <Link to="/dashboard" className="rounded-lg p-1.5 text-ink-muted hover:bg-sand">
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
           <h1 className="font-display text-lg font-bold text-ink">Catalogue</h1>
