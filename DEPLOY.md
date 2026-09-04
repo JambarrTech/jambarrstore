@@ -1,96 +1,66 @@
-# 🚀 Guide de déploiement — JambarrStore
+# 🚀 Guide de déploiement — JambarrStore (100% Vercel)
 
-## Architecture de production
+## Architecture
 
 ```
-┌─────────────────────┐     ┌─────────────────────┐
-│   Client (Vercel)   │     │   Admin (Vercel)    │
-│  jambarrstore.app   │     │ admin-jambarr.app   │
-└─────────┬───────────┘     └─────────┬───────────┘
-          │                           │
-          └───────────┬───────────────┘
-                      │
-              ┌───────▼───────┐
-              │  API (Railway) │
-              │  api-jambarr  │
-              └───────┬───────┘
-                      │
-              ┌───────▼───────┐
-              │  Neon Postgres │
-              └───────────────┘
+┌─────────────────────────────────────────┐
+│              Vercel                      │
+│  ┌──────────────┐  ┌──────────────────┐ │
+│  │ Client (SPA) │  │ Admin (SPA)      │ │
+│  │ /            │  │ /admin           │ │
+│  └──────────────┘  └──────────────────┘ │
+│  ┌──────────────────────────────────────┐│
+│  │ API (Serverless Functions)           ││
+│  │ /api/auth/login                      ││
+│  │ /api/products                        ││
+│  │ /api/orders                          ││
+│  └──────────────────────────────────────┘│
+└─────────────────┬───────────────────────┘
+                  │
+          ┌───────▼───────┐
+          │ Neon Postgres  │
+          └───────────────┘
 ```
 
-## Étape 1 : Déployer l'API sur Railway
+## Étape 1 : Créer le projet Vercel
 
-1. Créer un compte sur [railway.app](https://railway.app)
-2. Créer un nouveau projet → "Deploy from GitHub repo"
-3. Sélectionner le repo `JambarrTech/jambarrstore`
-4. Configurer le **Root Directory** : `services/api`
-5. Ajouter les variables d'environnement :
-
-| Variable | Valeur |
-|----------|--------|
-| `DATABASE_URL` | `postgresql://neondb_owner:npg_xxx@ep-xxx.neon.tech/neondb?sslmode=require` |
-| `JWT_SECRET` | `un-secret-aleatoire-long` |
-| `PORT` | `3001` |
-
-6. Railway va automatiquement détecter et déployer
-7. Noter l'URL de l'API (ex: `https://api-jambarrstore.up.railway.app`)
-
-## Étape 2 : Déployer le Client sur Vercel
-
-1. Créer un compte sur [vercel.com](https://vercel.com)
+1. Aller sur [vercel.com](https://vercel.com)
 2. Importer le repo `JambarrTech/jambarrstore`
-3. Configurer :
+3. Vercel détectera automatiquement le monorepo
+
+## Étape 2 : Configurer le projet
+
+Dans le dashboard Vercel → **Settings** → **General** :
 
 | Paramètre | Valeur |
 |-----------|--------|
-| **Framework** | Vite |
+| **Framework Preset** | Vite |
 | **Root Directory** | `services/client` |
 | **Build Command** | `cd ../.. && npm install && cd services/client && npm run build` |
 | **Output Directory** | `dist` |
 
-4. Ajouter la variable d'environnement :
+## Étape 3 : Variables d'environnement
 
-| Variable | Valeur |
-|----------|--------|
-| `VITE_API_URL` | `https://api-jambarrstore.up.railway.app` |
+Dans **Settings** → **Environment Variables** :
 
-5. Déployer
+| Variable | Valeur | Environments |
+|----------|--------|--------------|
+| `DATABASE_URL` | `postgresql://neondb_owner:npg_xxx@ep-xxx.neon.tech/neondb?sslmode=require` | Production, Preview |
+| `JWT_SECRET` | `un-secret-aleatoire-long-ici` | Production, Preview |
+| `VITE_API_URL` | (vide — même domaine) | Production, Preview |
 
-## Étape 3 : Déployer l'Admin sur Vercel
+## Étape 4 : Route rewriting
 
-1. Créer un **nouveau projet** Vercel (séparé)
-2. Importer le même repo `JambarrTech/jambarrstore`
-3. Configurer :
+Le `vercel.json` à la racine configure :
+- `/api/*` → Serverless Functions
+- `/admin/*` → Admin SPA
+- `/*` → Client SPA
 
-| Paramètre | Valeur |
-|-----------|--------|
-| **Framework** | Vite |
-| **Root Directory** | `services/admin` |
-| **Build Command** | `cd ../.. && npm install && cd services/admin && npm run build` |
-| **Output Directory** | `dist` |
-
-4. Ajouter la variable d'environnement :
-
-| Variable | Valeur |
-|----------|--------|
-| `VITE_API_URL` | `https://api-jambarrstore.up.railway.app` |
-
-5. Déployer
-
-## Étape 4 : Seed la base de données
-
-Après le déploiement de l'API, exécuter le seed une seule fois :
+## Étape 5 : Seed la base
 
 ```bash
-# En local avec la DB de production
+# En local avec la DB Neon
 DATABASE_URL="votre-url-neon" npx prisma db seed
-```
-
-Ou via Railway :
-```bash
-railway run npx prisma db seed
 ```
 
 ## Comptes par défaut
@@ -100,31 +70,44 @@ railway run npx prisma db seed
 | Admin | `admin@jambarrstore.com` | `admin123` |
 | Client | `client@jambarrstore.com` | `client123` |
 
+## Structure des Serverless Functions
+
+```
+api/
+├── lib/prisma.ts          # Singleton Prisma
+├── auth/
+│   ├── login.ts           # POST /api/auth/login
+│   ├── register.ts        # POST /api/auth/register
+│   └── me.ts              # GET /api/auth/me
+├── categories/
+│   └── index.ts           # GET /api/categories
+├── products/
+│   ├── index.ts           # GET/POST /api/products
+│   └── [id].ts            # PUT/DELETE/PATCH /api/products/:id
+├── orders/
+│   ├── index.ts           # GET/POST /api/orders
+│   └── [id].ts            # GET/PATCH /api/orders/:id
+├── customers/
+│   └── index.ts           # GET /api/customers
+└── dashboard/
+    ├── stats.ts           # GET /api/dashboard/stats
+    └── sales.ts           # GET /api/dashboard/sales
+```
+
 ## URLs finales
 
 | Service | URL |
 |---------|-----|
-| Client | `https://jambarrstore.vercel.app` |
-| Admin | `https://admin-jambarrstore.vercel.app` |
-| API | `https://api-jambarrstore.up.railway.app` |
+| Client | `https://votre-projet.vercel.app` |
+| Admin | `https://votre-projet.vercel.app/admin` |
+| API | `https://votre-projet.vercel.app/api/*` |
 
-## Variables d'environnement Vercel
+## Déploiement
 
-Dans le dashboard Vercel → Settings → Environment Variables :
+```bash
+# Pousser sur GitHub
+git push origin main
 
-### Client
-```
-VITE_API_URL = https://api-jambarrstore.up.railway.app
-```
-
-### Admin
-```
-VITE_API_URL = https://api-jambarrstore.up.railway.app
-```
-
-### API (Railway)
-```
-DATABASE_URL = postgresql://neondb_owner:npg_xxx@ep-xxx.neon.tech/neondb?sslmode=require
-JWT_SECRET = un-secret-aleatoire-ici
-PORT = 3001
+# Vercel déploie automatiquement
+# Pas de Railway, pas de Render — tout est sur Vercel
 ```
