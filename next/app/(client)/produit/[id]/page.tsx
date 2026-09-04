@@ -108,14 +108,14 @@ export default function ProduitPage({ params }: { params: Promise<{ id: string }
               />
             ))}
           </div>
-          <span>{product.reviewsCount || 0} avis</span>
-          <span>{product.soldCount || 0} vendus</span>
+          <span>{product.reviews || 0} avis</span>
+          <span>{product.sold || 0} vendus</span>
         </div>
 
-        {product.sellerName && (
+        {product.seller && (
           <div className="bg-white rounded-xl border border-[#E5E5EA] px-4 py-3">
             <span className="text-sm text-gray-400">Vendeur</span>
-            <p className="text-sm font-medium">{product.sellerName}</p>
+            <p className="text-sm font-medium">{product.seller}</p>
           </div>
         )}
 

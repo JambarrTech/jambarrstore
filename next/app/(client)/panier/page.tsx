@@ -15,6 +15,7 @@ export default function PanierPage() {
   const [payment, setPayment] = useState("Wave");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("jambarr_token");
@@ -25,21 +26,24 @@ export default function PanierPage() {
     const items = JSON.parse(localStorage.getItem("jambarr_cart") || "[]");
     setCart(items);
 
-    if (items.length > 0) {
-      const ids = items.map((i: any) => i.productId).join(",");
-      fetch(`/api/products?ids=${ids}`)
-        .then((r) => r.json())
-        .then((data) => {
-          const arr = Array.isArray(data) ? data : data.products || [];
-          const map: Record<string, any> = {};
-          arr.forEach((p: any) => { map[p.id] = p; });
-          setProducts(map);
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const fetchProducts = items.length > 0
+      ? fetch(`/api/products?ids=${items.map((i: any) => i.productId).join(",")}`)
+          .then((r) => r.json())
+          .then((data) => {
+            const arr = Array.isArray(data) ? data : data.products || [];
+            const map: Record<string, any> = {};
+            arr.forEach((p: any) => { map[p.id] = p; });
+            setProducts(map);
+          })
+          .catch(() => {})
+      : Promise.resolve();
+
+    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => setUser(data))
+      .catch(() => {});
+
+    Promise.all([fetchProducts]).finally(() => setLoading(false));
   }, [router]);
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -67,6 +71,11 @@ export default function PanierPage() {
   const handleOrder = async () => {
     setSubmitting(true);
     try {
+      const paymentMap: Record<string, string> = {
+        "Wave": "wave",
+        "Orange Money": "orange",
+        "Paiement à la livraison": "cash",
+      };
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -74,10 +83,11 @@ export default function PanierPage() {
           Authorization: `Bearer ${localStorage.getItem("jambarr_token")}`,
         },
         body: JSON.stringify({
-          items: cart.map((c: any) => ({ productId: c.productId, quantity: c.quantity })),
+          customerName: user?.name || "",
+          phone: user?.phone || "",
           city,
-          paymentMethod: payment,
-          total,
+          payment: paymentMap[payment] || "cash",
+          items: cart.map((c: any) => ({ productId: c.productId, quantity: c.quantity })),
         }),
       });
       if (!res.ok) throw new Error("Erreur lors de la commande");

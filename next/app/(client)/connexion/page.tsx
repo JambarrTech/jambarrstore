@@ -22,7 +22,7 @@ export default function ConnexionPage() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Identifiants incorrects");
+      if (!res.ok) throw new Error(data.error || "Identifiants incorrects");
       localStorage.setItem("jambarr_token", data.token);
       router.push("/confirmation");
     } catch (err: any) {

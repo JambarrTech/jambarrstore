@@ -51,11 +51,11 @@ export default function AdminClientsPage() {
                     <td className="px-4 py-3 text-gray-500">{customer.city || "-"}</td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-600">
-                        {customer.ordersCount || 0}
+                        {customer.orders || 0}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-medium text-[#FF6B00]">
-                      {(customer.totalSpent || 0).toLocaleString()} FCFA
+                      {(customer.spent || 0).toLocaleString()} FCFA
                     </td>
                   </tr>
                 ))}

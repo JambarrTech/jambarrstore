@@ -70,7 +70,7 @@ export default function HomePage() {
                 : "bg-white border border-[#E5E5EA] text-[#1A1A1A]"
             }`}
           >
-            {cat.emoji || "📦"} {cat.name}
+            {cat.emoji || "📦"} {cat.label}
           </button>
         ))}
       </div>
@@ -105,7 +105,7 @@ export default function HomePage() {
               <div className="p-3">
                 <h3 className="text-sm font-medium text-[#1A1A1A] truncate">{product.name}</h3>
                 <p className="text-[#FF6B00] font-bold mt-1">{product.price?.toLocaleString()} FCFA</p>
-                <p className="text-xs text-gray-400 mt-0.5">{product.soldCount || 0} vendus</p>
+                <p className="text-xs text-gray-400 mt-0.5">{product.sold || 0} vendus</p>
               </div>
             </Link>
           ))

@@ -13,8 +13,13 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get('category')
     const search = searchParams.get('search')
     const active = searchParams.get('active')
+    const ids = searchParams.get('ids')
 
     const where: any = {}
+
+    if (ids) {
+      where.id = { in: ids.split(',') }
+    }
 
     if (category) {
       where.categoryId = category

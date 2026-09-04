@@ -4,12 +4,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 
+const STATUS_LABELS: Record<string, string> = {
+  en_attente: "En attente",
+  confirmee: "Confirmée",
+  expediee: "Expédiée",
+  livree: "Livrée",
+  annulee: "Annulée",
+};
+
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped: "bg-purple-100 text-purple-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
+  en_attente: "bg-yellow-100 text-yellow-700",
+  confirmee: "bg-blue-100 text-blue-700",
+  expediee: "bg-purple-100 text-purple-700",
+  livree: "bg-green-100 text-green-700",
+  annulee: "bg-red-100 text-red-700",
 };
 
 export default function CommandesPage() {
@@ -64,7 +72,7 @@ export default function CommandesPage() {
                     STATUS_COLORS[order.status] || "bg-gray-100 text-gray-600"
                   }`}
                 >
-                  {order.status}
+                  {STATUS_LABELS[order.status] || order.status}
                 </span>
               </div>
               <p className="text-xs text-gray-400">

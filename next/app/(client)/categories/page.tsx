@@ -40,7 +40,7 @@ export default function CategoriesPage() {
               className="bg-white rounded-xl border border-[#E5E5EA] p-6 flex flex-col items-center gap-3 hover:shadow-md transition-shadow"
             >
               <span className="text-4xl">{cat.emoji || "📦"}</span>
-              <span className="text-sm font-medium text-[#1A1A1A]">{cat.name}</span>
+              <span className="text-sm font-medium text-[#1A1A1A]">{cat.label}</span>
             </Link>
           ))
         )}

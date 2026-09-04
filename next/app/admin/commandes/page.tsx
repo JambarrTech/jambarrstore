@@ -1,20 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+const STATUSES = ["en_attente", "confirmee", "expediee", "livree", "annulee"];
 const STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  confirmed: "Confirmée",
-  shipped: "Expédiée",
-  delivered: "Livrée",
-  cancelled: "Annulée",
+  en_attente: "En attente",
+  confirmee: "Confirmée",
+  expediee: "Expédiée",
+  livree: "Livrée",
+  annulee: "Annulée",
 };
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped: "bg-purple-100 text-purple-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
+  en_attente: "bg-yellow-100 text-yellow-700",
+  confirmee: "bg-blue-100 text-blue-700",
+  expediee: "bg-purple-100 text-purple-700",
+  livree: "bg-green-100 text-green-700",
+  annulee: "bg-red-100 text-red-700",
 };
 
 export default function AdminCommandesPage() {

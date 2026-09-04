@@ -22,6 +22,7 @@ export default function InscriptionPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur lors de l'inscription");
+      localStorage.setItem("jambarr_token", data.token);
       router.push("/confirmation");
     } catch (err: any) {
       setError(err.message);

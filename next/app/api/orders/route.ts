@@ -1,11 +1,18 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/auth'
 import { json, error } from '@/lib/api'
 
 const PAYMENT_MAP: Record<string, string> = {
   wave: 'Wave',
   orange: 'Orange_Money',
+  orange_money: 'Orange_Money',
   cash: 'Paiement_a_la_livraison',
+  'Paiement à la livraison': 'Paiement_a_la_livraison',
+  'Paiement_a_la_livraison': 'Paiement_a_la_livraison',
+  Wave: 'Wave',
+  Orange_Money: 'Orange_Money',
+  'Orange Money': 'Orange_Money',
 }
 
 export async function OPTIONS() {
@@ -14,10 +21,16 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest) {
   try {
+    const user = requireAuth(req)
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
 
     const where: any = {}
+
+    if (user.role === 'client') {
+      where.customerId = user.userId
+    }
+
     if (status) {
       where.status = status
     }
@@ -30,16 +43,21 @@ export async function GET(req: NextRequest) {
 
     return json(orders)
   } catch (e: any) {
+    if (e.message === 'Unauthorized') return error('Non autorisé', 401)
     return error(e.message || 'Erreur serveur', 500)
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { customerName, phone, city, payment, lines } = await req.json()
+    const { customerName, phone, city, payment, items } = await req.json()
 
-    if (!customerName || !phone || !city || !payment || !lines?.length) {
-      return error('Champs requis manquants')
+    if (!city) {
+      return error('Ville requise')
+    }
+
+    if (!items?.length) {
+      return error('Panier vide')
     }
 
     const paymentKey = PAYMENT_MAP[payment]
@@ -47,49 +65,51 @@ export async function POST(req: NextRequest) {
       return error('Méthode de paiement invalide')
     }
 
-    const cityRecord = await prisma.$queryRawUnsafe<{ id: string }[]>(
-      `SELECT id FROM "City" WHERE LOWER(name) = LOWER($1) LIMIT 1`,
-      city
-    )
+    const productIds = items.map((item: { productId: string }) => item.productId)
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    })
 
-    if (!cityRecord?.length) {
-      return error('Ville introuvable')
+    const productMap = new Map(products.map((p) => [p.id, p]))
+
+    for (const item of items) {
+      const product = productMap.get(item.productId)
+      if (!product) {
+        return error(`Produit ${item.productId} introuvable`)
+      }
+      if (product.stock < item.quantity) {
+        return error(`Stock insuffisant pour ${product.name}`)
+      }
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      let customer = await tx.customer.findFirst({
-        where: { phone },
-      })
+      let customer = phone
+        ? await tx.customer.findFirst({ where: { phone } })
+        : null
 
       if (!customer) {
         customer = await tx.customer.create({
-          data: { name: customerName, phone, city },
+          data: {
+            name: customerName || 'Client',
+            phone: phone || 'N/A',
+            city,
+          },
         })
       }
 
       let total = 0
       const orderLines: any[] = []
 
-      for (const line of lines) {
-        const product = await tx.product.findUnique({
-          where: { id: line.productId },
-        })
+      for (const item of items) {
+        const product = productMap.get(item.productId)!
 
-        if (!product) {
-          throw new Error(`Produit ${line.productId} introuvable`)
-        }
-
-        if (product.stock < line.quantity) {
-          throw new Error(`Stock insuffisant pour ${product.name}`)
-        }
-
-        total += product.price * line.quantity
+        total += product.price * item.quantity
 
         await tx.product.update({
-          where: { id: line.productId },
+          where: { id: item.productId },
           data: {
-            stock: { decrement: line.quantity },
-            sold: { increment: line.quantity },
+            stock: { decrement: item.quantity },
+            sold: { increment: item.quantity },
           },
         })
 
@@ -97,12 +117,13 @@ export async function POST(req: NextRequest) {
           productId: product.id,
           name: product.name,
           price: product.price,
-          quantity: line.quantity,
+          quantity: item.quantity,
           image: product.image,
         })
       }
 
-      const orderId = `JB-${Date.now().toString().slice(-4).padStart(4, '0')}`
+      const count = await tx.order.count()
+      const orderId = `JB-${String(2420 + count).padStart(4, '0')}`
 
       const order = await tx.order.create({
         data: {

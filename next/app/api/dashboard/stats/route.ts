@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth'
 import { json, error } from '@/lib/api'
 
 export async function OPTIONS() {
@@ -8,6 +9,8 @@ export async function OPTIONS() {
 
 export async function GET(req: NextRequest) {
   try {
+    requireAdmin(req)
+
     const [totalOrders, totalCustomers, totalProducts, revenueResult, pendingOrders, lowStock] =
       await Promise.all([
         prisma.order.count(),
@@ -18,7 +21,10 @@ export async function GET(req: NextRequest) {
           where: { status: { not: 'annulee' } },
         }),
         prisma.order.count({ where: { status: 'en_attente' } }),
-        prisma.product.count({ where: { stock: { lte: 5 } } }),
+        prisma.product.findMany({
+          where: { stock: { lte: 5 } },
+          select: { id: true, name: true, stock: true },
+        }),
       ])
 
     return json({
@@ -30,6 +36,8 @@ export async function GET(req: NextRequest) {
       lowStock,
     })
   } catch (e: any) {
+    if (e.message === 'Unauthorized') return error('Non autorisé', 401)
+    if (e.message === 'Forbidden') return error('Accès interdit', 403)
     return error(e.message || 'Erreur serveur', 500)
   }
 }

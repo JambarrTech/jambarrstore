@@ -22,10 +22,10 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { label: "Commandes", value: stats.orders || 0, icon: ShoppingCart, color: "bg-blue-500" },
+    { label: "Commandes", value: stats.totalOrders || 0, icon: ShoppingCart, color: "bg-blue-500" },
     { label: "Revenus", value: `${(stats.revenue || 0).toLocaleString()} FCFA`, icon: DollarSign, color: "bg-green-500" },
-    { label: "Clients", value: stats.customers || 0, icon: Users, color: "bg-purple-500" },
-    { label: "Produits", value: stats.products || 0, icon: Package, color: "bg-[#FF6B00]" },
+    { label: "Clients", value: stats.totalCustomers || 0, icon: Users, color: "bg-purple-500" },
+    { label: "Produits", value: stats.totalProducts || 0, icon: Package, color: "bg-[#FF6B00]" },
   ];
 
   const maxSales = Math.max(...sales.map((s: any) => s.value || 0), 1);
@@ -60,18 +60,18 @@ export default function AdminDashboard() {
                   className="w-full bg-[#FF6B00] rounded-t transition-all"
                   style={{ height: `${((s.value || 0) / maxSales) * 100}%`, minHeight: "4px" }}
                 />
-                <span className="text-[10px] text-gray-400">{s.label || ""}</span>
+                <span className="text-[10px] text-gray-400">{s.day || ""}</span>
               </div>
             ))
           )}
         </div>
       </div>
 
-      {stats.lowStock && stats.lowStock.length > 0 && (
+      {(stats.lowStock || []).length > 0 && (
         <div className="bg-white rounded-xl border border-[#E5E5EA] p-4">
           <h2 className="font-semibold mb-3 text-red-500">Stock faible</h2>
           <div className="space-y-2">
-            {stats.lowStock.map((item: any) => (
+            {(stats.lowStock || []).map((item: any) => (
               <div key={item.id} className="flex items-center justify-between py-2 border-b border-[#E5E5EA] last:border-0">
                 <span className="text-sm">{item.name}</span>
                 <span className="text-sm text-red-500 font-medium">{item.stock} restant(s)</span>

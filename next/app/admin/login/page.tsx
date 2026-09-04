@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Identifiants incorrects");
+      if (!res.ok) throw new Error(data.error || "Identifiants incorrects");
       if (data.user?.role !== "admin") throw new Error("Accès non autorisé");
       localStorage.setItem("jambarr_admin_token", data.token);
       router.push("/admin");

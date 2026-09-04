@@ -7,15 +7,42 @@ export async function OPTIONS() {
   return json(null)
 }
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    })
+
+    if (!product) {
+      return error('Produit introuvable', 404)
+    }
+
+    return json(product)
+  } catch (e: any) {
+    return error(e.message || 'Erreur serveur', 500)
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     requireAdmin(req)
     const { id } = await params
     const body = await req.json()
 
+    const allowedFields = ['name', 'price', 'oldPrice', 'image', 'stock', 'rating', 'reviews', 'sold', 'seller', 'description', 'active', 'categoryId']
+    const data: any = {}
+    for (const key of allowedFields) {
+      if (key in body) {
+        data[key] = body[key]
+      }
+    }
+
     const updated = await prisma.product.update({
       where: { id },
-      data: body,
+      data,
       include: { category: true },
     })
 
