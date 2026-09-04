@@ -20,7 +20,7 @@ export function Register() {
     setError(null);
     try {
       await register({ name, email, password, phone: phone || undefined });
-      navigate('/');
+      navigate('/confirmation', { replace: true });
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'inscription");
     } finally {

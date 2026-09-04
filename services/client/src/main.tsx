@@ -18,7 +18,7 @@ import { Help } from './pages/Help';
 import { Addresses } from './pages/Addresses';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
-import { Splash } from './pages/Splash';
+import { Splash, Confirmation } from './pages/Splash';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -37,6 +37,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/splash" element={<Splash />} />
             <Route path="/connexion" element={<Login />} />
             <Route path="/inscription" element={<Register />} />
+            <Route path="/confirmation" element={<Confirmation />} />
             <Route element={<MobileLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/categories" element={<Categories />} />

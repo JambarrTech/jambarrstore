@@ -18,7 +18,7 @@ export function Login() {
     setError(null);
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/confirmation', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Erreur de connexion');
     } finally {

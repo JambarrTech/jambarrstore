@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2Icon } from 'lucide-react';
+import { Loader2Icon, CheckCircle2Icon } from 'lucide-react';
 
 const steps = [
   {
@@ -33,7 +33,7 @@ export function Splash() {
     if (seen) {
       const timer = setTimeout(() => {
         setFadeOut(true);
-        setTimeout(() => navigate('/', { replace: true }), 500);
+        setTimeout(() => navigate('/connexion', { replace: true }), 500);
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -97,7 +97,7 @@ export function Splash() {
                 type="button"
                 onClick={() => {
                   localStorage.setItem(ONBOARDING_KEY, '1');
-                  navigate('/', { replace: true });
+                  navigate('/connexion', { replace: true });
                 }}
                 className="flex-1 rounded-xl border border-line py-3 text-sm font-semibold text-ink-soft hover:bg-white"
               >
@@ -116,7 +116,7 @@ export function Splash() {
               type="button"
               onClick={() => {
                 localStorage.setItem(ONBOARDING_KEY, '1');
-                navigate('/', { replace: true });
+                navigate('/connexion', { replace: true });
               }}
               className="w-full rounded-xl bg-brand py-3.5 text-sm font-bold text-white hover:bg-brand-dark"
             >
@@ -124,6 +124,34 @@ export function Splash() {
             </button>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+export function Confirmation() {
+  const navigate = useNavigate();
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const timer1 = setTimeout(() => setFadeOut(true), 2000);
+    const timer2 = setTimeout(() => navigate('/', { replace: true }), 2500);
+    return () => { clearTimeout(timer1); clearTimeout(timer2); };
+  }, [navigate]);
+
+  return (
+    <div className={`flex min-h-screen flex-col items-center justify-center bg-sand transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
+      <div className="flex flex-col items-center gap-4 px-8 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+          <CheckCircle2Icon className="h-12 w-12 text-green-600" />
+        </div>
+        <h1 className="font-display text-2xl font-extrabold text-ink">
+          Bienvenue !
+        </h1>
+        <p className="text-sm text-ink-muted">
+          Votre compte a été créé avec succès.
+        </p>
+        <Loader2Icon className="mt-2 h-5 w-5 animate-spin text-brand" />
       </div>
     </div>
   );
