@@ -13,7 +13,7 @@
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\" \"npm run dev:admin\"",
     "build:client": "npm run build --workspace=services/client",
     "build:admin": "npm run build --workspace=services/admin",
-    "build": "npm run build:client && npm run build:admin",
+    "build": "cd next && npm install && npx prisma generate && npm run build",
     "db:migrate": "npx prisma migrate dev",
     "db:seed": "npx prisma db seed",
     "db:studio": "npx prisma studio",
