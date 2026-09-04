@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BellIcon, SearchIcon, ShieldCheckIcon, TruckIcon, ZapIcon, Loader2Icon } from 'lucide-react';
+import { ShieldCheckIcon, TruckIcon, ZapIcon, Loader2Icon } from 'lucide-react';
 import { useStore, formatPrice } from '@jambarrtech/shared';
 import { ProductCard } from '../components/ProductCard';
 
@@ -35,31 +35,6 @@ export function Home() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 bg-brand px-4 pb-4 pt-5 text-white">
-        <div className="flex items-center justify-between">
-          <p className="font-display text-lg font-extrabold tracking-tight">
-            jambarr<span className="text-white/70">store</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate('/notifications')}
-            className="relative rounded-full p-1.5 transition-colors duration-150 ease-out hover:bg-white/15"
-            aria-label="Notifications"
-          >
-            <BellIcon className="h-5 w-5" aria-hidden />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-white" />
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate('/recherche')}
-          className="mt-3 flex w-full items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-left text-sm text-ink-muted transition-shadow duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        >
-          <SearchIcon className="h-4 w-4" aria-hidden />
-          Rechercher un produit, une marque…
-        </button>
-      </header>
-
       <section className="px-4 pt-4" aria-label="Promotion en cours">
         <div className="relative overflow-hidden rounded-2xl bg-brand-dark">
           <img

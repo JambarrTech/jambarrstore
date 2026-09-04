@@ -1,11 +1,13 @@
 import React from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
   LayoutGridIcon,
   PackageIcon,
   ShoppingBagIcon,
   UserIcon,
+  BellIcon,
+  SearchIcon,
 } from 'lucide-react';
 import { useStore } from '@jambarrtech/shared';
 
@@ -17,17 +19,50 @@ const tabs = [
   { to: '/compte', label: 'Compte', icon: UserIcon, end: false },
 ];
 
+const hideHeader = /^\/(produit|commandes|vendeur)/.test(window.location.pathname) ||
+  ['/favoris', '/recherche', '/notifications', '/aide', '/adresses'].includes(window.location.pathname);
+
 export function MobileLayout() {
   const { cartCount } = useStore();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isDetailPage = /^\/produit\//.test(location.pathname) ||
     /^\/commandes\//.test(location.pathname) ||
     /^\/vendeur\//.test(location.pathname) ||
     ['/favoris', '/recherche', '/notifications', '/aide', '/adresses'].includes(location.pathname);
 
+  const showHomeHeader = location.pathname === '/dashboard';
+
   return (
-    <div className="relative flex h-full min-h-screen flex-col overflow-hidden bg-sand">
+    <div className="relative flex h-full min-h-screen min-h-[100dvh] flex-col overflow-hidden bg-sand">
+      {showHomeHeader && (
+        <header className="sticky top-0 z-20 shrink-0 bg-brand px-4 pb-4 pt-5 text-white safe-top">
+          <div className="flex items-center justify-between">
+            <p className="font-display text-lg font-extrabold tracking-tight">
+              jambarr<span className="text-white/70">store</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/notifications')}
+              className="relative rounded-full p-1.5 transition-colors duration-150 ease-out hover:bg-white/15"
+              aria-label="Notifications"
+            >
+              <BellIcon className="h-5 w-5" aria-hidden />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-white" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/recherche')}
+            className="mt-3 flex w-full items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-left text-sm text-ink-muted transition-shadow duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <SearchIcon className="h-4 w-4" aria-hidden />
+            Rechercher un produit, une marque…
+          </button>
+        </header>
+      )}
+
       <main
         key={location.pathname}
         className="no-scrollbar flex-1 overflow-y-auto pb-24"
@@ -38,7 +73,7 @@ export function MobileLayout() {
       {!isDetailPage && (
         <nav
           aria-label="Navigation principale"
-          className="fixed inset-x-0 bottom-0 border-t border-line bg-white/95 backdrop-blur"
+          className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur safe-bottom"
         >
           <ul className="flex items-stretch justify-between px-2 pb-2 pt-1.5">
             {tabs.map((tab) => (
