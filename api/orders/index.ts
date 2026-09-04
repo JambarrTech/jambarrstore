@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jambarr-jwt-secret-2024';
 
-function requireAdmin(req: VercelRequest): boolean {
+function requireAdmin(req: any): boolean {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) return false;
   try {
@@ -15,7 +14,7 @@ function requireAdmin(req: VercelRequest): boolean {
   }
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
