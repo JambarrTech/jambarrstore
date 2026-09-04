@@ -13,5 +13,9 @@ export default defineConfig({
     port: 5174,
     open: '/admin'
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
   appType: 'spa'
 })
