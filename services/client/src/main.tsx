@@ -28,14 +28,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const ONBOARDING_KEY = 'jambarr_onboarding_done';
-
-function RootRedirect() {
-  const seen = localStorage.getItem(ONBOARDING_KEY);
-  if (!seen) return <Navigate to="/splash" replace />;
-  return <Navigate to="/" replace />;
-}
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
@@ -45,22 +37,24 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/splash" element={<Splash />} />
             <Route path="/connexion" element={<Login />} />
             <Route path="/inscription" element={<Register />} />
-            <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
+            <Route element={<MobileLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/produit/:id" element={<ProductDetail />} />
+              <Route path="/recherche" element={<SearchPage />} />
+              <Route path="/vendeur/:id" element={<SellerProfile />} />
+              <Route path="/aide" element={<Help />} />
+            </Route>
+            <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
               <Route path="/panier" element={<Cart />} />
               <Route path="/commandes" element={<Orders />} />
               <Route path="/commandes/:id" element={<OrderDetail />} />
               <Route path="/compte" element={<Account />} />
               <Route path="/favoris" element={<Favorites />} />
-              <Route path="/recherche" element={<SearchPage />} />
-              <Route path="/vendeur/:id" element={<SellerProfile />} />
               <Route path="/notifications" element={<Notifications />} />
-              <Route path="/aide" element={<Help />} />
               <Route path="/adresses" element={<Addresses />} />
             </Route>
-            <Route path="*" element={<RootRedirect />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </StoreProvider>
