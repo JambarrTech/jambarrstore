@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useState, useEffect, useMemo } from 'react';
 
 interface Toast {
   id: string;
@@ -40,6 +40,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => !t.duration || t.duration-- > 0));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [toasts.length]);
+
   const value = useMemo(
     () => ({
       toast,
@@ -47,7 +54,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       remove,
       toasts,
     }),
-    [toast, dismiss, remove]
+    [toast, dismiss, remove, toasts]
   );
 
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
@@ -55,7 +62,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('ToastProvider doit être utilisé dans l\'application');
+  if (!ctx) throw new Error("ToastProvider doit etre utilise dans l'application");
   return ctx;
 }
 
