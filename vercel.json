@@ -1,6 +1,7 @@
 {
-  "installCommand": "npm install",
-  "buildCommand": "cd next && npx prisma generate && npm run build",
+  "installCommand": "npm install && cd next && npx prisma generate",
+  "buildCommand": "cd next && npm run build",
   "outputDirectory": "next/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "regions": ["cdg1"]
 }

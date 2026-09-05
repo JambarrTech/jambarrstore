@@ -1,0 +1,18 @@
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  try {
+    const sellerName = decodeURIComponent(params.id);
+    const products = await prisma.product.findMany({
+      where: { seller: sellerName, active: true },
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(products);
+  } catch (err: any) {
+    console.error("[API Error]", err.message);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}
