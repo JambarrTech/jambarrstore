@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
-import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET || "jambarr-jwt-secret-2024";
 
 export const runtime = "nodejs";
 
@@ -34,6 +30,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const jwt = (await import("jsonwebtoken")).default;
+    const JWT_SECRET = process.env.JWT_SECRET || "jambarr-jwt-secret-2024";
     const header = req.headers.get("authorization");
     if (!header?.startsWith("Bearer ")) return NextResponse.json({ error: "Token manquant" }, { status: 401 });
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as { role: string };
