@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { StoreProvider, AuthProvider, useAuth } from '@jambarrtech/shared';
+import { ToastProvider } from '@jambarrtech/shared';
 import { MobileLayout } from './components/MobileLayout';
 import { Home } from './pages/Home';
 import { Categories } from './pages/Categories';
@@ -30,33 +31,37 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <StoreProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Splash />} />
-            <Route path="/connexion" element={<Login />} />
-            <Route path="/inscription" element={<Register />} />
-            <Route path="/confirmation" element={<Confirmation />} />
-            <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Home />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/produit/:id" element={<ProductDetail />} />
-              <Route path="/recherche" element={<SearchPage />} />
-              <Route path="/vendeur/:id" element={<SellerProfile />} />
-              <Route path="/aide" element={<Help />} />
-              <Route path="/panier" element={<Cart />} />
-              <Route path="/commandes" element={<Orders />} />
-              <Route path="/commandes/:id" element={<OrderDetail />} />
-              <Route path="/compte" element={<Account />} />
-              <Route path="/favoris" element={<Favorites />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/adresses" element={<Addresses />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </StoreProvider>
-    </AuthProvider>
+    <ClientApp />
   </React.StrictMode>
 );
+
+export default function ClientApp() {
+  return (
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Splash />} />
+          <Route path="/connexion" element={<Login />} />
+          <Route path="/inscription" element={<Register />} />
+          <Route path="/confirmation" element={<Confirmation />} />
+          <Route element={<ProtectedRoute><MobileLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Home />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/produit/:id" element={<ProductDetail />} />
+            <Route path="/recherche" element={<SearchPage />} />
+            <Route path="/vendeur/:id" element={<SellerProfile />} />
+            <Route path="/aide" element={<Help />} />
+            <Route path="/panier" element={<Cart />} />
+            <Route path="/commandes" element={<Orders />} />
+            <Route path="/commandes/:id" element={<OrderDetail />} />
+            <Route path="/compte" element={<Account />} />
+            <Route path="/favoris" element={<Favorites />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/adresses" element={<Addresses />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <ToastDisplay />
+    </>
+  );
+}

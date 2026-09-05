@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, Loader2Icon, EyeIcon, EyeOffIcon } from 'lucide-react';
-import { useAuth } from '@jambarrtech/shared';
+import { useAuth, useToast } from '@jambarrtech/shared';
 
 export function Login() {
   const { login } = useAuth();
@@ -18,8 +18,18 @@ export function Login() {
     setError(null);
     try {
       await login(email, password);
+      useToast().toast({
+        title: 'Connexion réussie !',
+        description: 'Vous êtes maintenant connecté',
+        type: 'success',
+      });
       navigate('/confirmation', { replace: true });
     } catch (err: any) {
+      useToast().toast({
+        title: 'Erreur de connexion',
+        description: err.message || 'Identifiants incorrects',
+        type: 'error',
+      });
       setError(err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);

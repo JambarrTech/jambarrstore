@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftIcon, MinusIcon, PlusIcon, TrashIcon, Loader2Icon } from 'lucide-react';
-import { useStore, formatPrice } from '@jambarrtech/shared';
+import { useStore, formatPrice, useToast } from '@jambarrtech/shared';
 
 const cities = [
   'Dakar — Plateau',
@@ -33,8 +33,20 @@ export function Cart() {
     setError(null);
     try {
       const id = await checkout(city, payment);
-      if (id) setOrderId(id);
+      if (id) {
+        useToast().toast({
+          title: 'Commande passée !',
+          description: `Votre commande ${id} a été effectuée avec succès`,
+          type: 'success',
+        });
+        setOrderId(id);
+      }
     } catch (err: any) {
+      useToast().toast({
+        title: 'Erreur',
+        description: err.message || 'Erreur lors de la commande',
+        type: 'error',
+      });
       setError(err.message || 'Erreur lors de la commande');
     } finally {
       setLoading(false);
@@ -113,7 +125,14 @@ export function Cart() {
                 <div className="mt-auto flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setQuantity(line.productId, line.quantity - 1)}
+                    onClick={() => {
+                      setQuantity(line.productId, line.quantity - 1);
+                      useToast().toast({
+                        title: 'Quantité mise à jour',
+                        description: 'La quantité a été réduite',
+                        type: 'info',
+                      });
+                    }}
                     className="rounded-lg border border-line p-1 hover:bg-sand"
                   >
                     <MinusIcon className="h-3.5 w-3.5" />
@@ -123,14 +142,28 @@ export function Cart() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setQuantity(line.productId, line.quantity + 1)}
+                    onClick={() => {
+                      setQuantity(line.productId, line.quantity + 1);
+                      useToast().toast({
+                        title: 'Quantité mise à jour',
+                        description: 'La quantité a été augmentée',
+                        type: 'info',
+                      });
+                    }}
                     className="rounded-lg border border-line p-1 hover:bg-sand"
                   >
                     <PlusIcon className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeFromCart(line.productId)}
+                    onClick={() => {
+                      removeFromCart(line.productId);
+                      useToast().toast({
+                        title: 'Produit retiré du panier',
+                        description: `${product.name} a été retiré`,
+                        type: 'success',
+                      });
+                    }}
                     className="ml-auto rounded-lg p-1 text-berry hover:bg-rose-50"
                   >
                     <TrashIcon className="h-4 w-4" />

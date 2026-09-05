@@ -10,7 +10,7 @@ import {
   ChevronDownIcon,
   MessageCircleIcon,
 } from 'lucide-react';
-import { useStore, formatPrice } from '@jambarrtech/shared';
+import { useStore, formatPrice, useToast } from '@jambarrtech/shared';
 
 const reviewData = [
   { name: 'Aminata D.', rating: 5, date: 'Il y a 2 jours', text: 'Excellent produit, je recommande ! La qualité est au rendez-vous.' },
@@ -49,8 +49,11 @@ export function ProductDetail() {
 
   function handleAddToCart() {
     addToCart(product.id);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+    useToast().toast({
+      title: 'Produit ajouté au panier',
+      description: `${product.name} a été ajouté avec succès`,
+      type: 'success',
+    });
   }
 
   function handleShare() {

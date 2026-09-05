@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, Loader2Icon, EyeIcon, EyeOffIcon } from 'lucide-react';
-import { useAuth } from '@jambarrtech/shared';
+import { useAuth, useToast } from '@jambarrtech/shared';
 
 export function Register() {
   const { register } = useAuth();
@@ -20,8 +20,18 @@ export function Register() {
     setError(null);
     try {
       await register({ name, email, password, phone: phone || undefined });
+      useToast().toast({
+        title: 'Inscription réussie !',
+        description: 'Votre compte a été créé avec succès',
+        type: 'success',
+      });
       navigate('/confirmation', { replace: true });
     } catch (err: any) {
+      useToast().toast({
+        title: 'Erreur d\'inscription',
+        description: err.message || "Erreur lors de l'inscription",
+        type: 'error',
+      });
       setError(err.message || "Erreur lors de l'inscription");
     } finally {
       setLoading(false);

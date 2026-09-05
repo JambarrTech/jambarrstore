@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { XIcon } from 'lucide-react';
-import { useStore, ProductApi } from '@jambarrtech/shared';
+import { useStore, useToast, formatPrice } from '@jambarrtech/shared';
 
 interface ProductDrawerProps {
   open: boolean;
@@ -37,6 +37,11 @@ export function ProductDrawer({ open, product, onClose, onSave }: ProductDrawerP
     e.preventDefault();
     if (!draft.name.trim() || draft.price <= 0) return;
     onSave(draft);
+    useToast().toast({
+      title: 'Produit sauvegardé',
+      description: draft.id ? 'Le produit est mis à jour' : 'Nouveau produit créé',
+      type: 'success',
+    });
     onClose();
   }
 
