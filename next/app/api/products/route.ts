@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || "jambarr-jwt-secret-2024";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
@@ -13,9 +15,9 @@ export async function GET(req: Request) {
     const active = searchParams.get("active");
     const ids = searchParams.get("ids");
 
-    const where: Prisma.ProductWhereInput = {};
+    const where: any = {};
     if (ids) where.id = { in: ids.split(",") };
-    if (category && category !== "all") where.categoryId = category as any;
+    if (category && category !== "all") where.categoryId = category;
     if (active !== undefined) where.active = active === "true";
     if (search) where.OR = [
       { name: { contains: search, mode: "insensitive" } },
