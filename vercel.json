@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install && cd next && npx prisma generate",
+  "installCommand": "npm install && cd next && npx prisma generate && mkdir -p node_modules/@prisma && cp -r ../node_modules/@prisma/* node_modules/@prisma/ && cp -r ../node_modules/.prisma node_modules/ 2>/dev/null; true",
   "buildCommand": "cd next && npm run build",
   "outputDirectory": "next/.next",
   "framework": "nextjs",
