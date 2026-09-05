@@ -1,5 +1,9 @@
 {
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npx prisma generate --schema=packages/shared/prisma/schema.prisma && npm run build --workspace=services/admin",
+  "outputDirectory": "services/admin/dist",
+  "framework": "vite",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
