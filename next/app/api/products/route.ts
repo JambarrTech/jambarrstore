@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || "jambarr-jwt-secret-2024";
 
 export const dynamic = "force-dynamic";
