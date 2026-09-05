@@ -3,5 +3,6 @@
   "buildCommand": "cd next && npm run build",
   "outputDirectory": "next/.next",
   "framework": "nextjs",
-  "regions": ["cdg1"]
+  "regions": ["cdg1"],
+  "ignoreCommand": "exit 0"
 }
