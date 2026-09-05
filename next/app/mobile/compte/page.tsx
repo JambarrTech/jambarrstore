@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Heart, Package, MapPin, HelpCircle, LogOut, ChevronRight, User } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function ComptePage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function ComptePage() {
       router.push("/mobile/connexion");
       return;
     }
-    fetch("/backend/api/auth/me", {
+    apiFetch("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())

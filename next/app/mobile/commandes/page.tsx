@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 const STATUS_LABELS: Record<string, string> = {
   en_attente: "En attente",
@@ -31,7 +32,7 @@ export default function CommandesPage() {
       router.push("/mobile/connexion");
       return;
     }
-    fetch("/backend/api/orders", {
+    apiFetch("/api/orders", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())

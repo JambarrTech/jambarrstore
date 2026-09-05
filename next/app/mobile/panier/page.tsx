@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Minus, Plus, Trash2, MapPin } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 const CITIES = ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor", "Kaolack", "Mbour", "Touba", "Rufisque"];
 const PAYMENT_METHODS = ["Wave", "Orange Money", "Paiement à la livraison"];
@@ -27,7 +28,7 @@ export default function PanierPage() {
     setCart(items);
 
     const fetchProducts = items.length > 0
-      ? fetch(`/backend/api/products?ids=${items.map((i: any) => i.productId).join(",")}`)
+      ? fetch(`/api/products?ids=${items.map((i: any) => i.productId).join(",")}`)
           .then((r) => r.json())
           .then((data) => {
             const arr = Array.isArray(data) ? data : data.products || [];
@@ -38,7 +39,7 @@ export default function PanierPage() {
           .catch(() => {})
       : Promise.resolve();
 
-    fetch("/backend/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setUser(data))
       .catch(() => {});
@@ -76,7 +77,7 @@ export default function PanierPage() {
         "Orange Money": "orange",
         "Paiement à la livraison": "cash",
       };
-      const res = await fetch("/backend/api/orders", {
+      const res = await apiFetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

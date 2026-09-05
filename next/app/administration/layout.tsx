@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Package, ShoppingCart, Users, LogOut, Menu, X } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 const NAV_ITEMS = [
   { href: "/administration", icon: LayoutDashboard, label: "Dashboard" },
@@ -29,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push("/administration/login");
       return;
     }
-    fetch("/backend/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
         if (data.role !== "admin") {

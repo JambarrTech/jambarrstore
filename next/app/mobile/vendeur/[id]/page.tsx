@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Store } from "lucide-react";
 import Link from "next/link";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function VendeurPage() {
   const params = useParams();
@@ -13,8 +14,8 @@ export default function VendeurPage() {
   useEffect(() => {
     if (!params.id) return;
     Promise.all([
-      fetch(`/backend/api/sellers/${params.id}`).then((r) => r.json()),
-      fetch(`/backend/api/sellers/${params.id}/products`).then((r) => r.json()),
+      fetch(`/api/sellers/${params.id}`).then((r) => r.json()),
+      fetch(`/api/sellers/${params.id}/products`).then((r) => r.json()),
     ])
       .then(([s, p]) => {
         setSeller(s);

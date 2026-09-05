@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User, Phone, UserPlus } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function InscriptionPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function InscriptionPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/backend/api/auth/register", {
+      const res = await apiFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

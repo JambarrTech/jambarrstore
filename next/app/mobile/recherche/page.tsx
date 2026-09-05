@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function RecherchePage() {
   const [query, setQuery] = useState("");
@@ -15,7 +16,7 @@ export default function RecherchePage() {
     setLoading(true);
     setSearched(true);
     try {
-      const res = await fetch(`/backend/api/products?search=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/products?search=${encodeURIComponent(query)}`);
       const data = await res.json();
       setResults(Array.isArray(data) ? data : data.products || []);
     } catch {

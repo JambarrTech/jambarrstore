@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/backend/api/categories")
+    apiFetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(Array.isArray(data) ? data : data.categories || []))
       .catch(() => {})

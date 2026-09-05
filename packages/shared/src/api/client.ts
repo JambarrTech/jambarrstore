@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function getToken(): string | null {
   try {
@@ -103,24 +103,24 @@ export interface SalesDayApi {
 export const api = {
   auth: {
     login: (data: { email: string; password: string }) =>
-      request<{ token: string; user: UserApi }>('/backend/api/auth/login', {
+      request<{ token: string; user: UserApi }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     register: (data: { name: string; email: string; password: string; phone?: string }) =>
-      request<{ token: string; user: UserApi }>('/backend/api/auth/register', {
+      request<{ token: string; user: UserApi }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     me: (token?: string) => {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      return request<UserApi>('/backend/api/auth/me', { headers });
+      return request<UserApi>('/api/auth/me', { headers });
     },
   },
 
   categories: {
-    list: () => request<CategoryApi[]>('/backend/api/categories'),
+    list: () => request<CategoryApi[]>('/api/categories'),
   },
 
   products: {
@@ -130,28 +130,28 @@ export const api = {
       if (params?.search) qs.set('search', params.search);
       if (params?.active !== undefined) qs.set('active', String(params.active));
       const query = qs.toString();
-      return request<ProductApi[]>(`/backend/api/products${query ? `?${query}` : ''}`);
+      return request<ProductApi[]>(`/api/products${query ? `?${query}` : ''}`);
     },
-    get: (id: string) => request<ProductApi>(`/backend/api/products/${id}`),
+    get: (id: string) => request<ProductApi>(`/api/products/${id}`),
     save: (product: Partial<ProductApi>) =>
-      request<ProductApi>('/backend/api/products', {
+      request<ProductApi>('/api/products', {
         method: 'POST',
         body: JSON.stringify(product),
       }),
     delete: (id: string) =>
-      request<{ success: boolean }>(`/backend/api/products/${id}`, { method: 'DELETE' }),
+      request<{ success: boolean }>(`/api/products/${id}`, { method: 'DELETE' }),
     toggle: (id: string) =>
-      request<ProductApi>(`/backend/api/products/${id}`, { method: 'PATCH' }),
+      request<ProductApi>(`/api/products/${id}`, { method: 'PATCH' }),
   },
 
   orders: {
     list: (params?: { status?: string }) => {
       const qs = params?.status ? `?status=${params.status}` : '';
-      return request<OrderApi[]>(`/backend/api/orders${qs}`);
+      return request<OrderApi[]>(`/api/orders${qs}`);
     },
-    get: (id: string) => request<OrderApi>(`/backend/api/orders/${id}`),
+    get: (id: string) => request<OrderApi>(`/api/orders/${id}`),
     setStatus: (id: string, status: string) =>
-      request<OrderApi>(`/backend/api/orders/${id}`, {
+      request<OrderApi>(`/api/orders/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }),
@@ -164,18 +164,18 @@ export const api = {
     payment: string;
     lines: { productId: string; quantity: number }[];
   }) =>
-    request<OrderApi>('/backend/api/orders', {
+    request<OrderApi>('/api/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   customers: {
-    list: () => request<CustomerApi[]>('/backend/api/customers'),
-    get: (id: string) => request<CustomerApi>(`/backend/api/customers/${id}`),
+    list: () => request<CustomerApi[]>('/api/customers'),
+    get: (id: string) => request<CustomerApi>(`/api/customers/${id}`),
   },
 
   dashboard: {
-    stats: () => request<DashboardStatsApi>('/backend/api/dashboard/stats'),
-    sales: () => request<SalesDayApi[]>('/backend/api/dashboard/sales'),
+    stats: () => request<DashboardStatsApi>('/api/dashboard/stats'),
+    sales: () => request<SalesDayApi[]>('/api/dashboard/sales'),
   },
 };

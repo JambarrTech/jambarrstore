@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ShoppingCart, DollarSign, Users, Package } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>({});
@@ -10,8 +11,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     const token = localStorage.getItem("jambarr_admin_token");
     Promise.all([
-      fetch("/backend/api/dashboard/stats", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-      fetch("/backend/api/dashboard/sales", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      apiFetch("/api/dashboard/stats", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      apiFetch("/api/dashboard/sales", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
     ])
       .then(([s, sl]) => {
         setStats(s);

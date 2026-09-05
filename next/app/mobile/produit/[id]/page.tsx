@@ -2,6 +2,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ShoppingCart, Star, Heart } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function ProduitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -12,7 +13,7 @@ export default function ProduitPage({ params }: { params: Promise<{ id: string }
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    fetch(`/backend/api/products/${id}`)
+    fetch(`/api/products/${id}`)
       .then((r) => r.json())
       .then((data) => setProduct(data))
       .catch(() => {})

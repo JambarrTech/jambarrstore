@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function AdminProduitsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -8,7 +9,7 @@ export default function AdminProduitsPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("jambarr_admin_token");
-    fetch("/backend/api/products", { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch("/api/products", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : data.products || []))
       .catch(() => {})
@@ -17,7 +18,7 @@ export default function AdminProduitsPage() {
 
   const toggleActive = async (id: string, current: boolean) => {
     const token = localStorage.getItem("jambarr_admin_token");
-    await fetch(`/backend/api/products/${id}`, {
+    await apiFetch(`/api/products/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ active: !current }),
@@ -28,7 +29,7 @@ export default function AdminProduitsPage() {
   const deleteProduct = async (id: string) => {
     if (!confirm("Supprimer ce produit ?")) return;
     const token = localStorage.getItem("jambarr_admin_token");
-    await fetch(`/backend/api/products/${id}`, {
+    await apiFetch(`/api/products/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function ConnexionPage() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function ConnexionPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/backend/api/auth/login", {
+      const res = await apiFetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

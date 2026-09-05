@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Users } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function AdminClientsPage() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -8,7 +9,7 @@ export default function AdminClientsPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("jambarr_admin_token");
-    fetch("/backend/api/customers", { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch("/api/customers", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setCustomers(Array.isArray(data) ? data : data.customers || []))
       .catch(() => {})

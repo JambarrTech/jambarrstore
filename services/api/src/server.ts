@@ -1,18 +1,31 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import { PrismaClient, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'jambarr-jwt-secret-2024';
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-app.use(cors());
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
-// ─── Types ────────────────────────────────────────────────
+// --- Types ---
 interface JwtPayload {
   userId: string;
   email: string;
@@ -27,7 +40,7 @@ declare global {
   }
 }
 
-// ─── Error handler ────────────────────────────────────────
+// --- Error handler ---
 function handleErrors(fn: (req: Request, res: Response) => Promise<any>) {
   return async (req: Request, res: Response) => {
     try {
@@ -42,7 +55,7 @@ function handleErrors(fn: (req: Request, res: Response) => Promise<any>) {
   };
 }
 
-// ─── Auth middleware ───────────────────────────────────────
+// --- Auth middleware ---
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
@@ -59,24 +72,24 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (req.user?.role !== 'admin') {
-    return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
+    return res.status(403).json({ error: 'Acces reserve aux administrateurs' });
   }
   next();
 }
 
-// ─── Auth routes ──────────────────────────────────────────
+// --- Auth routes ---
 app.post('/api/auth/register', handleErrors(async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (!name?.trim() || !email?.trim() || !password) {
     return res.status(400).json({ error: 'Nom, email et mot de passe requis' });
   }
   if (password.length < 6) {
-    return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caracteres' });
   }
 
   const existing = await prisma.user.findUnique({ where: { email: email.trim() } });
   if (existing) {
-    return res.status(409).json({ error: 'Cet email est déjà utilisé' });
+    return res.status(409).json({ error: 'Cet email est deja utilise' });
   }
 
   const hash = await bcrypt.hash(password, 10);
@@ -139,25 +152,29 @@ app.get('/api/auth/me', requireAuth, handleErrors(async (req, res) => {
   res.json({ ...user, createdAt: user.createdAt.toISOString() });
 }));
 
-// ─── Categories ───────────────────────────────────────────
+// --- Categories ---
 app.get('/api/categories', handleErrors(async (_req, res) => {
   const categories = await prisma.category.findMany();
   res.json(categories);
 }));
 
-// ─── Products ─────────────────────────────────────────────
+// --- Products ---
 app.get('/api/products', handleErrors(async (req, res) => {
-  const { category, search, active } = req.query;
+  const { category, search, active, ids } = req.query;
 
   const where: Prisma.ProductWhereInput = {};
+  if (ids) where.id = { in: (ids as string).split(',') };
   if (category && category !== 'all') where.categoryId = category as string;
   if (active !== undefined) where.active = active === 'true';
-  if (search) where.name = { contains: search as string, mode: 'insensitive' };
+  if (search) where.OR = [
+    { name: { contains: search as string, mode: 'insensitive' } },
+    { description: { contains: search as string, mode: 'insensitive' } },
+  ];
 
   const products = await prisma.product.findMany({
     where,
     include: { category: true },
-    orderBy: { sold: 'desc' },
+    orderBy: { createdAt: 'desc' },
   });
   res.json(products);
 }));
@@ -177,8 +194,8 @@ app.post('/api/products', requireAuth, requireAdmin, handleErrors(async (req, re
     return res.status(400).json({ error: 'Nom et prix requis' });
   }
   const product = id
-    ? await prisma.product.update({ where: { id }, data })
-    : await prisma.product.create({ data });
+    ? await prisma.product.update({ where: { id }, data, include: { category: true } })
+    : await prisma.product.create({ data, include: { category: true } });
   res.json(product);
 }));
 
@@ -186,6 +203,7 @@ app.put('/api/products/:id', requireAuth, requireAdmin, handleErrors(async (req,
   const product = await prisma.product.update({
     where: { id: req.params.id },
     data: req.body,
+    include: { category: true },
   });
   res.json(product);
 }));
@@ -196,45 +214,51 @@ app.delete('/api/products/:id', requireAuth, requireAdmin, handleErrors(async (r
   res.json({ success: true });
 }));
 
-app.patch('/api/products/:id/toggle', requireAuth, requireAdmin, handleErrors(async (req, res) => {
+app.patch('/api/products/:id', requireAuth, requireAdmin, handleErrors(async (req, res) => {
   const product = await prisma.product.findUnique({ where: { id: req.params.id } });
   if (!product) return res.status(404).json({ error: 'Produit introuvable' });
   const updated = await prisma.product.update({
     where: { id: req.params.id },
     data: { active: !product.active },
+    include: { category: true },
   });
   res.json(updated);
 }));
 
-// ─── Orders ───────────────────────────────────────────────
-app.get('/api/orders', handleErrors(async (req, res) => {
+// --- Orders ---
+app.get('/api/orders', requireAuth, handleErrors(async (req, res) => {
   const { status } = req.query;
   const where: Prisma.OrderWhereInput = {};
   if (status && status !== 'all') where.status = status as any;
+  if (req.user?.role === 'client') where.customerId = req.user.userId;
 
   const orders = await prisma.order.findMany({
     where,
-    include: { lines: true },
+    include: { lines: true, customer: true },
     orderBy: { createdAt: 'desc' },
   });
   res.json(orders);
 }));
 
-app.get('/api/orders/:id', handleErrors(async (req, res) => {
+app.get('/api/orders/:id', requireAuth, handleErrors(async (req, res) => {
   const order = await prisma.order.findUnique({
     where: { id: req.params.id },
     include: { lines: true },
   });
   if (!order) return res.status(404).json({ error: 'Commande introuvable' });
+  if (req.user?.role === 'client' && order.customerId !== req.user.userId) {
+    return res.status(403).json({ error: 'Acces interdit' });
+  }
   res.json(order);
 }));
 
-app.patch('/api/orders/:id/status', requireAuth, requireAdmin, handleErrors(async (req, res) => {
+app.patch('/api/orders/:id', requireAuth, requireAdmin, handleErrors(async (req, res) => {
   const { status } = req.body;
   if (!status) return res.status(400).json({ error: 'Statut requis' });
   const order = await prisma.order.update({
     where: { id: req.params.id },
     data: { status },
+    include: { lines: true },
   });
   res.json(order);
 }));
@@ -242,64 +266,91 @@ app.patch('/api/orders/:id/status', requireAuth, requireAdmin, handleErrors(asyn
 const paymentMap: Record<string, string> = {
   wave: 'Wave',
   orange: 'Orange_Money',
+  orange_money: 'Orange_Money',
   cash: 'Paiement_a_la_livraison',
+  'Paiement a la livraison': 'Paiement_a_la_livraison',
+  'Paiement_a_la_livraison': 'Paiement_a_la_livraison',
+  Wave: 'Wave',
+  Orange_Money: 'Orange_Money',
+  'Orange Money': 'Orange_Money',
 };
 
-// ─── Checkout (transactionnel) ────────────────────────────
-app.post('/api/checkout', handleErrors(async (req, res) => {
-  const { customerId, customerName, city, payment, lines } = req.body;
+// --- Checkout ---
+app.post('/api/orders', handleErrors(async (req, res) => {
+  const { customerName, phone, city, payment, items, userId } = req.body;
 
   if (!city) return res.status(400).json({ error: 'Ville requise' });
-  if (!lines || lines.length === 0) {
-    return res.status(400).json({ error: 'Panier vide' });
-  }
+  if (!items || items.length === 0) return res.status(400).json({ error: 'Panier vide' });
 
-  let resolvedCustomerId = customerId;
-  if (!resolvedCustomerId) {
-    const guest = await prisma.customer.create({
-      data: { name: customerName || 'Client', phone: 'N/A', city },
-    });
-    resolvedCustomerId = guest.id;
-  }
+  const paymentKey = paymentMap[payment];
+  if (!paymentKey) return res.status(400).json({ error: 'Methode de paiement invalide' });
 
-  const productIds = lines.map((l: any) => l.productId);
+  const productIds = items.map((item: any) => item.productId);
   const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
   const productMap = new Map(products.map(p => [p.id, p]));
 
-  const orderLinesData: { productId: string; name: string; price: number; quantity: number; image: string }[] = [];
-  let total = 0;
-
-  for (const line of lines) {
-    const product = productMap.get(line.productId);
-    if (!product) return res.status(400).json({ error: `Produit ${line.productId} introuvable` });
-    if (product.stock < line.quantity) {
-      return res.status(400).json({ error: `Stock insuffisant pour "${product.name}" (disponible: ${product.stock})` });
+  for (const item of items) {
+    const product = productMap.get(item.productId);
+    if (!product) return res.status(400).json({ error: `Produit ${item.productId} introuvable` });
+    if (product.stock < item.quantity) {
+      return res.status(400).json({ error: `Stock insuffisant pour ${product.name}` });
     }
-    total += product.price * line.quantity;
-    orderLinesData.push({ productId: product.id, name: product.name, price: product.price, quantity: line.quantity, image: product.image });
   }
 
-  const order = await prisma.$transaction(async (tx) => {
-    for (const line of orderLinesData) {
-      await tx.product.update({ where: { id: line.productId }, data: { stock: { decrement: line.quantity } } });
+  const result = await prisma.$transaction(async (tx) => {
+    let customer = phone
+      ? await tx.customer.findFirst({ where: { phone } })
+      : null;
+
+    if (!customer) {
+      customer = await tx.customer.create({
+        data: { name: customerName || 'Client', phone: phone || 'N/A', city },
+      });
     }
+
+    let total = 0;
+    const orderLines: any[] = [];
+
+    for (const item of items) {
+      const product = productMap.get(item.productId)!;
+      total += product.price * item.quantity;
+
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity }, sold: { increment: item.quantity } },
+      });
+
+      orderLines.push({
+        productId: product.id, name: product.name, price: product.price,
+        quantity: item.quantity, image: product.image,
+      });
+    }
+
     const count = await tx.order.count();
     const orderId = `JB-${String(2420 + count).padStart(4, '0')}`;
-    return tx.order.create({
+
+    const order = await tx.order.create({
       data: {
-        id: orderId, customerId: resolvedCustomerId, customerName: customerName || 'Client',
-        city, payment: (paymentMap[payment] || 'Wave') as any, total,
-        lines: { create: orderLinesData },
+        id: orderId, customerId: userId || customer.id, customerName: customer.name,
+        city, payment: paymentKey as any, total,
+        lines: { create: orderLines },
       },
       include: { lines: true },
     });
+
+    await tx.customer.update({
+      where: { id: customer.id },
+      data: { orders: { increment: 1 }, spent: { increment: total } },
+    });
+
+    return order;
   });
 
-  res.json(order);
+  res.json(result);
 }));
 
-// ─── Customers ────────────────────────────────────────────
-app.get('/api/customers', handleErrors(async (_req, res) => {
+// --- Customers ---
+app.get('/api/customers', requireAuth, requireAdmin, handleErrors(async (_req, res) => {
   const customers = await prisma.customer.findMany({ orderBy: { spent: 'desc' } });
   res.json(customers);
 }));
@@ -310,18 +361,26 @@ app.get('/api/customers/:id', handleErrors(async (req, res) => {
   res.json(customer);
 }));
 
-// ─── Dashboard Stats ──────────────────────────────────────
-app.get('/api/dashboard/stats', handleErrors(async (_req, res) => {
-  const totalOrders = await prisma.order.count();
-  const totalCustomers = await prisma.customer.count();
-  const totalProducts = await prisma.product.count();
-  const revenue = await prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: 'annulee' } } });
-  const pendingOrders = await prisma.order.count({ where: { status: 'en_attente' } });
-  const lowStock = await prisma.product.findMany({ where: { stock: { lte: 5 } }, orderBy: { stock: 'asc' } });
-  res.json({ totalOrders, totalCustomers, totalProducts, revenue: revenue._sum.total || 0, pendingOrders, lowStock });
+// --- Dashboard ---
+app.get('/api/dashboard/stats', requireAuth, requireAdmin, handleErrors(async (_req, res) => {
+  const [totalOrders, totalCustomers, totalProducts, revenueResult, pendingOrders, lowStock] =
+    await Promise.all([
+      prisma.order.count(),
+      prisma.customer.count(),
+      prisma.product.count(),
+      prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: 'annulee' } } }),
+      prisma.order.count({ where: { status: 'en_attente' } }),
+      prisma.product.findMany({ where: { stock: { lte: 5 } }, select: { id: true, name: true, stock: true } }),
+    ]);
+
+  res.json({
+    totalOrders, totalCustomers, totalProducts,
+    revenue: revenueResult._sum.total || 0,
+    pendingOrders, lowStock,
+  });
 }));
 
-app.get('/api/dashboard/sales', handleErrors(async (_req, res) => {
+app.get('/api/dashboard/sales', requireAuth, requireAdmin, handleErrors(async (_req, res) => {
   const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   const now = new Date();
   const weekAgo = new Date(now);
@@ -335,9 +394,12 @@ app.get('/api/dashboard/sales', handleErrors(async (_req, res) => {
   res.json([...salesByDay.slice(1), salesByDay[0]]);
 }));
 
-// ─── Start ────────────────────────────────────────────────
+// --- Health check ---
+app.get('/api/health', (_req, res) => { res.json({ status: 'ok' }); });
+
+// --- Start ---
 app.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+  console.log(API server running on http://localhost:);
 });
 
-process.on('beforeExit', () => prisma.$disconnect());
+process.on('beforeExit', () => prisma.());

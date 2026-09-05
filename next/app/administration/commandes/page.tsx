@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { apiFetch } from '@/lib/apiClient';
 
 const STATUSES = ["en_attente", "confirmee", "expediee", "livree", "annulee"];
 const STATUS_LABELS: Record<string, string> = {
@@ -24,7 +25,7 @@ export default function AdminCommandesPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("jambarr_admin_token");
-    fetch("/backend/api/orders", { headers: { Authorization: `Bearer ${token}` } })
+    apiFetch("/api/orders", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => setOrders(Array.isArray(data) ? data : data.orders || []))
       .catch(() => {})
@@ -33,7 +34,7 @@ export default function AdminCommandesPage() {
 
   const updateStatus = async (orderId: string, status: string) => {
     const token = localStorage.getItem("jambarr_admin_token");
-    await fetch(`/backend/api/orders/${orderId}`, {
+    await apiFetch(`/api/orders/${orderId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status }),

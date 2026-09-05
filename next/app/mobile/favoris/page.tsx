@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Heart } from "lucide-react";
+import { apiFetch } from '@/lib/apiClient';
 
 export default function FavorisPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function FavorisPage() {
       setLoading(false);
       return;
     }
-    fetch(`/backend/api/products?ids=${favIds.join(",")}`)
+    fetch(`/api/products?ids=${favIds.join(",")}`)
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : data.products || []))
       .catch(() => {})
