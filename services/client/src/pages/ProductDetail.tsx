@@ -8,7 +8,7 @@ import {
   Share2Icon,
   Loader2Icon,
   ChevronDownIcon,
-  MessageCircleIcon,
+  CheckCircleIcon,
 } from 'lucide-react';
 import { useStore, formatPrice, useToast } from '@jambarrtech/shared';
 

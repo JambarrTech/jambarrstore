@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2Icon, Loader2Icon } from 'lucide-react';
 
@@ -33,7 +33,6 @@ export function Splash() {
   const [step, setStep] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
   const seen = localStorage.getItem(ONBOARDING_KEY);
 
   const goToNext = useCallback(() => {
@@ -58,14 +57,10 @@ export function Splash() {
 
   useEffect(() => {
     if (seen) return;
-    timerRef.current = setInterval(() => {
-      setStep((prev) => {
-        if (prev < slides.length - 1) return prev + 1;
-        clearInterval(timerRef.current);
-        return prev;
-      });
+    const timer = setInterval(() => {
+      setStep((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
     }, SLIDE_INTERVAL);
-    return () => clearInterval(timerRef.current);
+    return () => clearInterval(timer);
   }, [seen]);
 
   const handleTouchStart = (e: React.TouchEvent) => {

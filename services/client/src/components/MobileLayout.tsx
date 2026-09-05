@@ -19,9 +19,6 @@ const tabs = [
   { to: '/compte', label: 'Compte', icon: UserIcon, end: false },
 ];
 
-const hideHeader = /^\/(produit|commandes|vendeur)/.test(window.location.pathname) ||
-  ['/favoris', '/recherche', '/notifications', '/aide', '/adresses'].includes(window.location.pathname);
-
 export function MobileLayout() {
   const { cartCount, loading, error } = useStore();
   const location = useLocation();
