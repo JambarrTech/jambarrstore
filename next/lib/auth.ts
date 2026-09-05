@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import { prisma } from './prisma'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'jambarr-jwt-secret-2024'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required')
+}
 
 export function signToken(payload: { userId: string; email: string; role: string }) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' })

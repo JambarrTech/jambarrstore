@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { customerName, phone, city, payment, items } = await req.json()
+    const { customerName, phone, city, payment, items, userId } = await req.json()
 
     if (!city) {
       return error('Ville requise')
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       const order = await tx.order.create({
         data: {
           id: orderId,
-          customerId: customer.id,
+          customerId: userId || customer.id,
           customerName: customer.name,
           city,
           payment: paymentKey as any,

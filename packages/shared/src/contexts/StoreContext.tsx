@@ -101,9 +101,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     Promise.all([
       api.categories.list().then(setCategories),
       refreshProducts(),
-      refreshOrders(),
-      refreshCustomers(),
     ])
+      .then(() => {
+        refreshOrders().catch(() => {});
+        refreshCustomers().catch(() => {});
+      })
       .catch((err) => {
         if (mounted) setError(err.message || 'Erreur de chargement');
       })
