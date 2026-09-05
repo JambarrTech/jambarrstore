@@ -1,5 +1,4 @@
 generator client {
-  output   = "../../next/node_modules/@prisma/client"
   provider = "prisma-client-js"
 }
 
