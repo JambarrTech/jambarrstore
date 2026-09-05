@@ -34,8 +34,10 @@ function ToastItem({ toast }: { toast: { id: string; type: string; title: string
             <path d="M12 9v2m0 4h.01M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
           )}
           {toast.type === 'info' && (
-            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1" />
-            <path d="m9 12-2 2 4 4L12 18l6-6-2-2z" fill="currentColor" strokeWidth="0" />
+            <>
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1" />
+              <path d="m9 12-2 2 4 4L12 18l6-6-2-2z" fill="currentColor" strokeWidth="0" />
+            </>
           )}
         </svg>
         <div className="flex-1 min-w-0">
