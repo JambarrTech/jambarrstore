@@ -23,7 +23,7 @@ const hideHeader = /^\/(produit|commandes|vendeur)/.test(window.location.pathnam
   ['/favoris', '/recherche', '/notifications', '/aide', '/adresses'].includes(window.location.pathname);
 
 export function MobileLayout() {
-  const { cartCount } = useStore();
+  const { cartCount, loading, error } = useStore();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,8 +35,8 @@ export function MobileLayout() {
   const showHomeHeader = location.pathname === '/dashboard';
 
   return (
-    <div className="relative flex h-full min-h-screen min-h-[100dvh] flex-col overflow-hidden bg-sand">
-      {showHomeHeader && (
+    <div className="relative flex flex-col min-h-screen bg-sand">
+      {showHomeHeader && !loading && !error && (
         <header className="sticky top-0 z-20 shrink-0 bg-brand px-4 pb-4 pt-5 text-white safe-top">
           <div className="flex items-center justify-between">
             <p className="font-display text-lg font-extrabold tracking-tight">
@@ -65,12 +65,27 @@ export function MobileLayout() {
 
       <main
         key={location.pathname}
-        className="no-scrollbar flex-1 overflow-y-auto pb-24"
+        className="flex-1 overflow-y-auto pb-24"
       >
         <Outlet />
       </main>
 
-      {!isDetailPage && (
+      {error && (
+        <div className="fixed inset-0 flex items-center justify-center bg-sand/80 z-50">
+          <div className="rounded-2xl bg-white p-8 shadow-card ring-1 ring-line/70 text-center max-w-md">
+            <p className="text-sm text-rose-600 mb-4">{error}</p>
+            <p className="text-sm text-ink-muted">Vérifiez votre connexion</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark"
+            >
+              Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!isDetailPage && !loading && !error && (
         <nav
           aria-label="Navigation principale"
           className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-white/95 backdrop-blur safe-bottom"
@@ -111,6 +126,15 @@ export function MobileLayout() {
             ))}
           </ul>
         </nav>
+      )}
+
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="rounded-2xl bg-white p-8 shadow-card ring-1 ring-line/70">
+            <Loader2Icon className="h-8 w-8 animate-spin text-brand" />
+            <p className="mt-4 text-sm text-ink">Chargement...</p>
+          </div>
+        </div>
       )}
     </div>
   );
